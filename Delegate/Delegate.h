@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <tuple>
+#include <any>
 
 namespace dw
 {
@@ -93,6 +94,10 @@ namespace dw
             this->subscribers -= subscribers;
         }
 
+        /**
+         * @brief           Remove all subscribed functions from this delegate.
+         * @returns *None*
+         */
         void Clear()
         {
             this->subscribers.clear();
@@ -127,15 +132,15 @@ namespace dw
             return *this;
         }
 
-        DelegateBase& operator+=(const std::tuple<std::initializer_list<DelegateType>, Params...>& rhs)
-        {
-            for (auto x : std::get<0>(rhs))
-            {
-                this->subscribers.push_back(x);
-            }
-            AttachParameters(std::get<1>(rhs));
-            return *this;
-        }
+        // DelegateBase& operator+=(const std::tuple<std::initializer_list<DelegateType>, Params...>& rhs)
+        // {
+        //     for (auto x : std::get<0>(rhs))
+        //     {
+        //         this->subscribers.push_back(x);
+        //     }
+        //     AttachParameters(std::get<1>(rhs));
+        //     return *this;
+        // }
 
         /**
          * @brief           Unsubscribe choosen function from this delegate.
@@ -320,4 +325,35 @@ namespace dw
             return sum;
         }
     };
+
+    // template <typename... Params>
+    // class MasterDelegate : public Delegate<Params...>
+    // {
+    //     template<typename... Args>
+    //     struct MasterArgs
+    //     {
+    //         std::tuple<Args...> args;
+    //     };
+
+    //     //std::vector<std::any> masterArgs;
+
+    // public:
+    //     using typename DelegateBase<void, Params...>::DelegateType;
+    //     using DelegateBase<void, Params...>::subscribers;
+    //     using DelegateBase<void, Params...>::Clear;
+    //     using DelegateBase<void, Params...>::Invoke;
+
+    //     template<typename T, typename Args>
+    //     T InvokeAll(T type, Args... args)
+    //     {
+    //         return T();
+    //     }
+
+    //     template<typename Returns, typename... Args>
+    //     Returns AddUnique(Args... args)
+    //     {
+    //         return Returns();
+    //     }
+    // };
+    
 } // namespace dw
