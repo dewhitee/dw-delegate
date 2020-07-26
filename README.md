@@ -12,4 +12,4 @@ Project is created with:
 * C++ Standard: 14 (or later)
 
 ## Setup
-Just put Delegate folder into the project.
+Just put **Delegate** folder into the project.
