@@ -7,8 +7,8 @@
 ## General info
 C#-like delegate for C++.
 #### Contains
-* Delegate.h              -   Main class of this project.
-* DelegateVisualizer.h    -   Utility class that can visualize delegate's data.
+* ***Delegate.h***              -   Main class of this project.
+* ***DelegateVisualizer.h***    -   Utility class that can visualize delegate's data.
 
 ## Technologies
 Project is created with:
