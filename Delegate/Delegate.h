@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <tuple>
 #include <any>
+#include <type_traits>
 
 namespace dw
 {
@@ -50,7 +51,7 @@ namespace dw
             }
         }
 
-        void Combine(const std::tuple<const DelegateBase&, Params...>& other)
+        void Combine(const std::tuple<const DelegateBase &, Params...> &other)
         {
             for (size_t i = 0; i < std::get<0>(other).subscribers.size(); i++)
             {
@@ -74,14 +75,25 @@ namespace dw
             }
         }
 
-        ReturnType Invoke()
+        void Subscribe(const DelegateType &delegate, std::vector<std::tuple<Params...>> params)
         {
-            ReturnType result = ReturnType();
+            for (size_t i = 0; i < params.size(); i++)
+            {
+                this->subscribers.push_back(delegate);
+                AttachParameters(params[i], std::index_sequence_for<Params...>());
+            }
+        }
+
+        /**
+         * @brief           Call all subscribed functions of this delegate that have parameters saved on subscription.
+         */
+        void Invoke()
+        {
             for (size_t i = 0; i < subscribers.size(); i++)
             {
-                result += HelperInvoke(parameters[i].parameters, i, std::index_sequence_for<Params...>());
+                HelperInvoke(parameters[i].parameters, i, std::index_sequence_for<Params...>());
             }
-            return result;
+            return;
         }
 
         /**
@@ -116,7 +128,7 @@ namespace dw
             return *this;
         }
 
-        DelegateBase& operator+=(const std::tuple<DelegateType, Params...>& rhs)
+        DelegateBase &operator+=(const std::tuple<DelegateType, Params...> &rhs)
         {
             this->subscribers.push_back(std::get<0>(rhs));
             AttachParameters(std::get<1>(rhs));
@@ -154,7 +166,7 @@ namespace dw
             return *this;
         }
 
-        DelegateBase& operator-=(const std::tuple<DelegateType, Params...>& rhs)
+        DelegateBase &operator-=(const std::tuple<DelegateType, Params...> &rhs)
         {
             subscribers.erase(std::remove(subscribers.begin(), subscribers.end(), std::get<0>(rhs)), subscribers.end());
             AttachParameters(std::get<1>(rhs));
@@ -251,16 +263,22 @@ namespace dw
             return *this;
         }
 
+    protected:
+        template <size_t... Indices>
+        ReturnType HelperInvoke(const std::tuple<Params...> &tuple, int index, std::index_sequence<Indices...>)
+        {
+            return subscribers[index](std::get<Indices>(tuple)...);
+        }
+
     private:
         void AttachParameters(Params... params)
         {
             this->parameters.push_back(DelegateParams<Params...>{subscribers.size() - 1, params...});
         }
-
-        template<size_t... Indices>
-        ReturnType HelperInvoke(const std::tuple<Params...>& tuple, int index, std::index_sequence<Indices...>)
+        template <size_t... Indices>
+        void AttachParameters(const std::tuple<Params...> &tuple, std::index_sequence<Indices...>)
         {
-            return subscribers[index](std::get<Indices>(tuple)...);
+            this->parameters.push_back(DelegateParams<Params...>{subscribers.size() - 1, std::get<Indices>(tuple)...});
         }
     };
 
@@ -273,10 +291,11 @@ namespace dw
     class Delegate : public DelegateBase<void, Params...>
     {
     public:
-        using typename DelegateBase<void, Params...>::DelegateType;
-        using DelegateBase<void, Params...>::subscribers;
-        using DelegateBase<void, Params...>::Clear;
-        using DelegateBase<void, Params...>::Invoke;
+        using Parent = DelegateBase<void, Params...>;
+        using Parent::Clear;
+        using Parent::Invoke;
+        using Parent::subscribers;
+        using typename Parent::DelegateType;
 
         /**
          * @brief           Invoke all subscribed functions.
@@ -304,10 +323,31 @@ namespace dw
     class RetDelegate : public DelegateBase<ReturnType, Params...>
     {
     public:
-        using typename DelegateBase<ReturnType, Params...>::DelegateType;
-        using DelegateBase<ReturnType, Params...>::subscribers;
-        using DelegateBase<ReturnType, Params...>::Clear;
-        using DelegateBase<ReturnType, Params...>::Invoke;
+        using Parent = DelegateBase<ReturnType, Params...>;
+        using Parent::Clear;
+        using Parent::HelperInvoke;
+        using Parent::parameters;
+        using Parent::subscribers;
+        using typename Parent::DelegateType;
+
+        /**
+         * @brief           Call all subscribed functions of this delegate that have parameters saved on subscription.
+         * @note            
+         * @returns         Sum of results of each function invocation.
+         */
+        ReturnType Invoke()
+        {
+            if (!std::is_void<ReturnType>::value)
+            {
+                ReturnType result = ReturnType();
+                for (size_t i = 0; i < subscribers.size(); i++)
+                {
+                    result += HelperInvoke(parameters[i].parameters, i, std::index_sequence_for<Params...>());
+                }
+                return result;
+            }
+            return ReturnType();
+        }
 
         /**
          * @brief           Invoke all functions subscribed to this delegate.
@@ -355,5 +395,5 @@ namespace dw
     //         return Returns();
     //     }
     // };
-    
+
 } // namespace dw
