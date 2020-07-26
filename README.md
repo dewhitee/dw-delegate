@@ -6,9 +6,13 @@
 
 ## General info
 C#-like delegate for C++.
+
+All of this project are templates.
 #### Contains
-* ***Delegate.h***              -   Main class of this project.
-* ***DelegateVisualizer.h***    -   Utility class that can visualize delegate's data.
+* ***DelegateBase < ReturnType, Params... >***          -   Base (parent) class of all delegates from this project.
+* ***Delegate < void, Params... >***                    -   Main class of this project.
+* ***RetDelegate < ReturnType, Params... >***           -   Same as ***Delegate***, but can have a custom *ReturnType* specified as template parameter.
+* ***DelegateVisualizer < ReturnType, Params... >***    -   Utility class that can visualize delegate's data.
 
 ## Technologies
 Project is created with:
