@@ -1,14 +1,15 @@
 # dw-delegate
 ## Table of contents
 * [General info](#general-info)
+* [Contains](#contains)
 * [Technologies](#technologies)
 * [Setup](#setup)
 
 ## General info
 C#-like delegate for C++.
 
-All of this project are templates.
 #### Contains
+###### Note: All classes are templates.
 * ***DelegateBase < ReturnType, Params... >***          -   Base (parent) class of all delegates.
 * ***Delegate < void, Params... >***                    -   Main delegate class.
 * ***RetDelegate < ReturnType, Params... >***           -   Same as ***Delegate***, but can have a custom *ReturnType* specified as template parameter.
