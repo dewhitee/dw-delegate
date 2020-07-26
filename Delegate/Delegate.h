@@ -63,7 +63,7 @@ namespace dw
         void Subscribe(const DelegateType &delegate, Params... params)
         {
             this->subscribers.push_back(delegate);
-            AttachParameters(params...);
+            AttachParameters(std::tuple<Params...>(params...), std::index_sequence_for<Params...>());
         }
 
         void Subscribe(const std::initializer_list<DelegateType> &delegates, Params... params)
@@ -71,7 +71,7 @@ namespace dw
             for (auto d : delegates)
             {
                 this->subscribers.push_back(d);
-                AttachParameters(params...);
+                AttachParameters(std::tuple<Params...>(params...), std::index_sequence_for<Params...>());
             }
         }
 
@@ -268,7 +268,8 @@ namespace dw
         template <size_t... Indices>
         void AttachParameters(const std::tuple<Params...> &tuple, std::index_sequence<Indices...>)
         {
-            this->parameters.push_back(DelegateParams<Params...>{subscribers.size() - 1, std::get<Indices>(tuple)...});
+            this->parameters.push_back(DelegateParams<Params...>{subscribers.size() - 1, tuple});
+            //    std::get<Indices>(tuple)...});
         }
     };
 
