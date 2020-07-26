@@ -9,8 +9,8 @@ C#-like delegate for C++.
 
 All of this project are templates.
 #### Contains
-* ***DelegateBase < ReturnType, Params... >***          -   Base (parent) class of all delegates from this project.
-* ***Delegate < void, Params... >***                    -   Main class of this project.
+* ***DelegateBase < ReturnType, Params... >***          -   Base (parent) class of all delegates.
+* ***Delegate < void, Params... >***                    -   Main delegate class.
 * ***RetDelegate < ReturnType, Params... >***           -   Same as ***Delegate***, but can have a custom *ReturnType* specified as template parameter.
 * ***DelegateVisualizer < ReturnType, Params... >***    -   Utility class that can visualize delegate's data.
 
