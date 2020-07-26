@@ -26,7 +26,7 @@ namespace dw
         typedef ReturnType (*DelegateType)(Params...);
 
         /**
-         * @brief           **std::vector** of function that are subscribed to this delegate.
+         * @brief           **std::vector** of functions that are subscribed to this delegate.
          */
         std::vector<DelegateType> subscribers;
 
@@ -143,16 +143,6 @@ namespace dw
             }
             return *this;
         }
-
-        // DelegateBase& operator+=(const std::tuple<std::initializer_list<DelegateType>, Params...>& rhs)
-        // {
-        //     for (auto x : std::get<0>(rhs))
-        //     {
-        //         this->subscribers.push_back(x);
-        //     }
-        //     AttachParameters(std::get<1>(rhs));
-        //     return *this;
-        // }
 
         /**
          * @brief           Unsubscribe choosen function from this delegate.
