@@ -17,3 +17,6 @@ Debug/dewhitee.tlog/CL.write.1.tlog
 Debug/dewhitee.tlog/CL.read.1.tlog
 Debug/dewhitee.tlog/CL.command.1.tlog
 Debug/dewhitee.log
+Event.h
+Function.h
+Property/Property.h
