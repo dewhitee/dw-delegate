@@ -15,7 +15,7 @@ namespace dw
         template <typename... T>
         struct DelegateParams
         {
-            int index;
+            int index = -1;
             std::tuple<T...> parameters;
         };
 
@@ -89,8 +89,17 @@ namespace dw
          */
         void Invoke()
         {
-            for (size_t i = 0; i < subscribers.size(); i++)
+            // for (size_t i = 0; i < subscribers.size(); i++)
+            // {
+            //     if (parameters[i].index >= 0)
+            //     {
+            //         std::cout << "Index of subscribed function = " << parameters[i].index << std::endl;
+            //         HelperInvoke(parameters[i].parameters, parameters[i].index, std::index_sequence_for<Params...>());
+            //     }
+            // }
+            for (size_t i = 0; i < parameters.size(); i++)
             {
+                std::cout << "Index of subscribed function = " << parameters[i].index << std::endl;
                 HelperInvoke(parameters[i].parameters, i, std::index_sequence_for<Params...>());
             }
             return;
@@ -268,6 +277,7 @@ namespace dw
         template <size_t... Indices>
         void AttachParameters(const std::tuple<Params...> &tuple, std::index_sequence<Indices...>)
         {
+            std::cout << "Index on subscription: " + std::to_string(subscribers.size() - 1) << std::endl;
             this->parameters.push_back(DelegateParams<Params...>{subscribers.size() - 1, tuple});
         }
     };
@@ -329,9 +339,19 @@ namespace dw
         {
             if (!std::is_void<ReturnType>::value)
             {
+                // ReturnType result = ReturnType();
+                // for (size_t i = 0; i < subscribers.size(); i++)
+                // {
+                //     if (parameters[i].index >= 0)
+                //     {
+                //         std::cout << "Index of subscribed function = " << parameters[i].index << std::endl;
+                //         result += HelperInvoke(parameters[i].parameters, i, std::index_sequence_for<Params...>());
+                //     }
+                // }
                 ReturnType result = ReturnType();
-                for (size_t i = 0; i < subscribers.size(); i++)
+                for (size_t i = 0; i < parameters.size(); i++)
                 {
+                    std::cout << "Index of subscribed function = " << parameters[i].index << std::endl;
                     result += HelperInvoke(parameters[i].parameters, i, std::index_sequence_for<Params...>());
                 }
                 return result;
