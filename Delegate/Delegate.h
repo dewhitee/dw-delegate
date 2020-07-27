@@ -269,7 +269,6 @@ namespace dw
         void AttachParameters(const std::tuple<Params...> &tuple, std::index_sequence<Indices...>)
         {
             this->parameters.push_back(DelegateParams<Params...>{subscribers.size() - 1, tuple});
-            //    std::get<Indices>(tuple)...});
         }
     };
 

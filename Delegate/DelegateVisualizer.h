@@ -60,39 +60,6 @@ namespace dw
         virtual void Print(ViewType type, Params... params) = 0;
 
         virtual void Visualize() = 0;
-
-    private:
-        // void ListPrint(Params... params)
-        // {
-        //     using namespace std;
-        //     try
-        //     {
-        //         for (size_t i = 0; i < delegate->GetSubscribers().size(); i++)
-        //         {
-        //             ReturnType result = delegate->GetSubscribers()[i](params...);
-        //             cout << "[" + to_string(i) + "] Function returned " + to_string(result) + "\n";
-        //         }
-        //     }
-        //     catch (...)
-        //     {
-        //         cout << "Delegate's result can't be represented as string." << endl;
-        //         throw;
-        //     }
-        // }
-
-        // void ListPrintNoReturn(Params... params)
-        // {
-        //     using namespace std;
-        //     for (size_t i = 0; i < delegate->GetSubscribers().size(); i++)
-        //     {
-        //         delegate->GetSubscribers()[i](params...);
-        //         cout << "[" + to_string(i) + "] Function returned \n";
-        //     }
-        // }
-
-        // void TablePrint()
-        // {
-        // }
     };
 
     template <typename... Params>
