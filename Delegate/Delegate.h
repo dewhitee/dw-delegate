@@ -89,14 +89,6 @@ namespace dw
          */
         void Invoke()
         {
-            // for (size_t i = 0; i < subscribers.size(); i++)
-            // {
-            //     if (parameters[i].index >= 0)
-            //     {
-            //         std::cout << "Index of subscribed function = " << parameters[i].index << std::endl;
-            //         HelperInvoke(parameters[i].parameters, parameters[i].index, std::index_sequence_for<Params...>());
-            //     }
-            // }
             for (size_t i = 0; i < parameters.size(); i++)
             {
                 std::cout << "Index of subscribed function = " << parameters[i].index << std::endl;
@@ -304,7 +296,7 @@ namespace dw
          */
         void operator()(Params... params)
         {
-            for (auto i : subscribers)
+            for (auto&& i : subscribers)
             {
                 i(params...);
             }
@@ -322,6 +314,7 @@ namespace dw
     template <typename ReturnType, typename... Params>
     class RetDelegate : public DelegateBase<ReturnType, Params...>
     {
+        static_assert(!std::is_void<ReturnType>::value, "RetDelegate can't have void return type!");
     public:
         using Parent = DelegateBase<ReturnType, Params...>;
         using Parent::Clear;
@@ -337,26 +330,13 @@ namespace dw
          */
         ReturnType Invoke()
         {
-            if (!std::is_void<ReturnType>::value)
+            ReturnType result = ReturnType();
+            for (size_t i = 0; i < parameters.size(); i++)
             {
-                // ReturnType result = ReturnType();
-                // for (size_t i = 0; i < subscribers.size(); i++)
-                // {
-                //     if (parameters[i].index >= 0)
-                //     {
-                //         std::cout << "Index of subscribed function = " << parameters[i].index << std::endl;
-                //         result += HelperInvoke(parameters[i].parameters, i, std::index_sequence_for<Params...>());
-                //     }
-                // }
-                ReturnType result = ReturnType();
-                for (size_t i = 0; i < parameters.size(); i++)
-                {
-                    std::cout << "Index of subscribed function = " << parameters[i].index << std::endl;
-                    result += HelperInvoke(parameters[i].parameters, i, std::index_sequence_for<Params...>());
-                }
-                return result;
+                std::cout << "Index of subscribed function = " << parameters[i].index << std::endl;
+                result += HelperInvoke(parameters[i].parameters, i, std::index_sequence_for<Params...>());
             }
-            return ReturnType();
+            return result;
         }
 
         /**
@@ -368,11 +348,63 @@ namespace dw
         ReturnType operator()(Params... params)
         {
             ReturnType sum = ReturnType();
-            for (auto i : subscribers)
+            for (auto&& i : subscribers)
             {
                 sum += i(params...);
             }
             return sum;
+        }
+    };
+    
+    template <typename... Params>
+    class SimpleDelegate
+    {
+        /**
+         * @brief           Type defining a pointer to the function with the same arguments as Delegate's
+         */
+        typedef void (*DelegateType)(Params...);
+
+        /**
+         * @brief           **std::vector** of functions that are subscribed to this delegate.
+         */
+        std::vector<DelegateType> subscribers;
+
+    public:
+        /**
+         * @brief           Invoke all subscribed functions.
+         * 
+         * @param  params:  Arguments of each subscribed function.
+         */
+        void operator()(Params... params)
+        {
+            for (auto&& i : subscribers)
+            {
+                i(params...);
+            }
+        }
+
+        /**
+         * @brief           Subscribe function to this delegate.
+         * 
+         * @param  rhs:     Function to subscribe.
+         * @returns         Reference to the delegate instance.
+         */
+        SimpleDelegate &operator+=(const DelegateType &rhs)
+        {
+            this->subscribers.push_back(rhs);
+            return *this;
+        }
+
+        /**
+         * @brief           Unsubscribe choosen function from this delegate.
+         * 
+         * @param  rhs:     Function to unsubscribe from this delegate.
+         * @returns         Reference to the delegate instance.
+         */
+        SimpleDelegate &operator-=(const DelegateType &rhs)
+        {
+            subscribers.erase(std::remove(subscribers.begin(), subscribers.end(), rhs), subscribers.end());
+            return *this;
         }
     };
 
