@@ -68,7 +68,7 @@ namespace dw
 
         void Subscribe(const std::initializer_list<DelegateType> &delegates, Params... params)
         {
-            for (auto d : delegates)
+            for (auto&& d : delegates)
             {
                 this->subscribers.push_back(d);
                 AttachParameters(std::tuple<Params...>(params...), std::index_sequence_for<Params...>());
