@@ -18,7 +18,7 @@ C#-like delegate for C++.
 * ***DelegateVisualizer < ReturnType, Params... >***    -   Utility class that can visualize delegate's data.
 
 #### Examples
-
+###### Initialization
 ```cpp
 // Initializing delegates:
 
@@ -37,7 +37,7 @@ RetDelegate<void, int&> badDelegate; // Note that you can't initialize RetDelega
 SimpleDelegate<int> del4;
 
 ```
-
+###### Subscribing
 ```cpp
 // Subscribing lambda to the delegate without specifying - saving any arguments - for lazy evaluation:
 
@@ -56,7 +56,7 @@ auto lambda = [](int& x) { x++; };
 int y = 0;
 del.Subscribe(lambda, y);
 ```
-
+###### Calling
 ```cpp
 // Calling subscribed functions of delegate:
 
