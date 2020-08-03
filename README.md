@@ -58,21 +58,37 @@ del.Subscribe(lambda, y);
 ```
 #### Calling
 ```cpp
-// Calling subscribed functions of delegate:
+// Calling subscribed functions of delegate with one parameter:
 
 Delegate<int&> del;
+auto lambda = [](int& x) { x++; };
+
+int y = 0;
+del.Subscribe(lambda, y);
 
 // Calling only those functions that were subscribed to the delegate with Subscribe() method:
 del.Invoke();
 
 // Calling all subscribed functions (saved parameters will not be used):
-int y = 0;
-del(y);
+int z = 0;
+del(z);
 
 ```
 
 ```cpp
-// Calling
+// Calling subscribed functions of delegate returning integer with one parameter:
+
+RetDelegate<int, int&> del;
+auto lambda = [](int& x) -> int { return x; };
+
+int y = 0;
+del.Subscribe(lambda, y);
+
+// Calling only those functions that were subscribed to the delegate with Subscribe() method:
+int a = del.Invoke();
+
+// Calling all subscribed functions without saved parameters:
+int b = del(a);
 
 ```
 
