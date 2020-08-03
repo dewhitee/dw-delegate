@@ -31,6 +31,8 @@ Delegate<int&> del2;
 // Initialization of delegate with one parameter returning integer.
 RetDelegate<int, int&> del3;
 
+RetDelegate<void, int&> badDelegate; // Note that you can't initialize RetDelegate returning void.
+
 // Initialization of SimpleDelegate with one parameter.
 SimpleDelegate<int> del4;
 
