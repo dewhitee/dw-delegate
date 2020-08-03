@@ -71,20 +71,20 @@ del += {lambda1, lambda2, lambda3};
 del(4);
 ```
 ###### Result
-```
+```cpp
 First lambda x = 4
 Second lambda x = 4
 Third lambda x = 4
 ```
 
-```
+```cpp
 // Subscribing with Subscribe() method, passing parameters to be evaluated by choosen lambda function when the Invoke() method will be called.
 del.Subscribe(lambda1, {10, 13, 15});
 
 del.Invoke();
 ```
 ###### Result
-```
+```cpp
 First lambda x = 10
 First lambda x = 13
 First lambda x = 15
