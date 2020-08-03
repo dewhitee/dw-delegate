@@ -17,8 +17,8 @@ C#-like delegate for C++.
 * ***SimpleDelegate < Params... >***                    -   Type of delegate that can't have subscribed functions with saved arguments for lazy evaluation. Is more memory efficient than Delegate or RetDelegate.
 * ***DelegateVisualizer < ReturnType, Params... >***    -   Utility class that can visualize delegate's data.
 
-#### Examples
-###### Initialization
+### Examples
+#### Initialization
 ```cpp
 // Initializing delegates:
 
@@ -37,7 +37,7 @@ RetDelegate<void, int&> badDelegate; // Note that you can't initialize RetDelega
 SimpleDelegate<int> del4;
 
 ```
-###### Subscribing
+#### Subscribing
 ```cpp
 // Subscribing lambda to the delegate without specifying - saving any arguments - for lazy evaluation:
 
@@ -56,7 +56,7 @@ auto lambda = [](int& x) { x++; };
 int y = 0;
 del.Subscribe(lambda, y);
 ```
-###### Calling
+#### Calling
 ```cpp
 // Calling subscribed functions of delegate:
 
