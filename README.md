@@ -69,6 +69,18 @@ auto lambda3 = [](int x) { std::cout << "Third lambda x = " << x << std::endl; }
 // Subscribing with initializer list
 del += {lambda1, lambda2, lambda3};
 
+del(4);
+
+```
+###### Result
+```
+First lambda x = 4
+Second lambda x = 4
+Third lambda x = 4
+```
+
+```
+
 // Subscribing with Subscribe() method, passing parameters to be evaluated by choosen lambda function
 // when the Invoke() method will be called.
 del.Subscribe(lambda1, {10, 13, 15});
