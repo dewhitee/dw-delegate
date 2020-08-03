@@ -56,6 +56,33 @@ auto lambda = [](int& x) { x++; };
 int y = 0;
 del.Subscribe(lambda, y);
 ```
+
+```cpp
+// Subscribe several different functions using initializer list:
+
+Delegate<int> del;
+
+auto lambda1 = [](int x) { std::cout << "First lambda x = " << x << std::endl; };
+auto lambda2 = [](int x) { std::cout << "Second lambda x = " << x << std::endl; };
+auto lambda3 = [](int x) { std::cout << "Third lambda x = " << x << std::endl; };
+
+// Subscribing with initializer list
+del += {lambda1, lambda2, lambda3};
+
+// Subscribing with Subscribe() method, passing parameters to be evaluated by choosen lambda function
+// when the Invoke() method will be called.
+del.Subscribe(lambda1, {10, 13, 15});
+
+del.Invoke();
+```
+###### Result
+```
+First lambda x = 10
+First lambda x = 13
+First lambda x = 15
+```
+
+
 #### Calling
 ```cpp
 // Calling subscribed functions of delegate with one parameter:
