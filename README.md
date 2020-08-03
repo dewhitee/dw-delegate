@@ -20,6 +20,23 @@ C#-like delegate for C++.
 #### Examples
 
 ```cpp
+// Initializing delegates:
+
+// Initialization of delegate with void return type and no parameters.
+Delegate del1;
+
+// Initialization of delegate with one parameter returning nothing.
+Delegate<int&> del2;
+
+// Initialization of delegate with one parameter returning integer.
+RetDelegate<int, int&> del3;
+
+// Initialization of SimpleDelegate with one parameter.
+SimpleDelegate<int> del4;
+
+```
+
+```cpp
 // Subscribing lambda to the delegate without specifying - saving any arguments - for lazy evaluation:
 
 Delegate<int&> del;
@@ -49,6 +66,11 @@ del.Invoke();
 // Calling all subscribed functions (saved parameters will not be used):
 int y = 0;
 del(y);
+
+```
+
+```cpp
+// Calling
 
 ```
 
