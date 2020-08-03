@@ -35,7 +35,6 @@ RetDelegate<void, int&> badDelegate; // Note that you can't initialize RetDelega
 
 // Initialization of SimpleDelegate with one parameter.
 SimpleDelegate<int> del4;
-
 ```
 #### Subscribing
 ```cpp
@@ -70,7 +69,6 @@ auto lambda3 = [](int x) { std::cout << "Third lambda x = " << x << std::endl; }
 del += {lambda1, lambda2, lambda3};
 
 del(4);
-
 ```
 ###### Result
 ```
@@ -80,9 +78,7 @@ Third lambda x = 4
 ```
 
 ```
-
-// Subscribing with Subscribe() method, passing parameters to be evaluated by choosen lambda function
-// when the Invoke() method will be called.
+// Subscribing with Subscribe() method, passing parameters to be evaluated by choosen lambda function when the Invoke() method will be called.
 del.Subscribe(lambda1, {10, 13, 15});
 
 del.Invoke();
@@ -111,7 +107,6 @@ del.Invoke();
 // Calling all subscribed functions (saved parameters will not be used):
 int z = 0;
 del(z);
-
 ```
 
 ```cpp
@@ -128,7 +123,6 @@ int a = del.Invoke();
 
 // Calling all subscribed functions without saved parameters:
 int b = del(a);
-
 ```
 
 ## Technologies
