@@ -212,6 +212,51 @@ del.Invoke();
 x = 4
 x = 6
 ```
+---
+```cpp
+// Removing n functions from the delegate from end or beginning.
+
+Delegate<int> del;
+auto lambda1 = [](int x) { std::cout << "x = " << x << std::endl; };
+auto lambda2 = [](int y) { std::cout << "y = " << y << std::endl; };
+
+del.Subscribe(lambda1, {4, 6, 8});
+del.Subscribe(lambda2, {-5, -7});
+
+std::cout << "Before:" << std::endl;
+del.Invoke();
+
+// Removing 1 function from the end:
+del.Remove(1);
+
+std::cout << "\nAfter removing 1 function from the end:" << std::endl;
+del.Invoke();
+
+// Removing 2 functions from the beginning:
+del.Remove(1, false);
+
+std::cout << "\nAfter removing 2 functions from the beginning: " << std::endl;
+del.Invoke();
+```
+###### Result
+```cpp
+Before:
+x = 4
+x = 6
+x = 8
+y = -5
+y = -7
+
+After removing 1 function from the end:
+x = 4
+x = 6
+x = 8
+y = -5
+
+After removing 2 functions from the beginning:
+x = 8
+y = -5
+```
 
 ## Technologies
 Project is created with:
