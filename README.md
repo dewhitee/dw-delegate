@@ -3,6 +3,9 @@
 * [General info](#general-info)
 * [Contains](#contains)
 * [Examples](#examples)
+  - [Initialization](#initialization)
+  - [Subscribing](#subscribing)
+  - [Calling](#calling)
 * [Technologies](#technologies)
 * [Setup](#setup)
 
@@ -18,6 +21,11 @@ C#-like delegate for C++.
 * ***DelegateVisualizer < ReturnType, Params... >***    -   Utility class that can visualize delegate's data.
 
 ### Examples
+```cpp
+#include "Delegate\Delegate.h"
+
+using namespace dw;
+```
 #### Initialization
 ```cpp
 // Initializing delegates:
@@ -39,7 +47,7 @@ SimpleDelegate<int> del4;
 
 #### Subscribing
 ```cpp
-// Subscribing lambda to the delegate without specifying - saving any arguments - for lazy evaluation:
+// Subscribing lambda to the delegate without specifying parameters for later evaluation:
 
 Delegate<int&> del;
 auto lambda = [](int& x) { x++; };
@@ -54,7 +62,9 @@ Delegate<int&> del;
 auto lambda = [](int& x) { x++; };
 
 int y = 0;
+
 del.Subscribe(lambda, y);
+// Then Invoke() method will call this lambda function with the 'y' as parameter.
 ```
 
 ```cpp
@@ -105,6 +115,28 @@ First lambda x = 21
 Second lambda x = 21
 Third lambda x = 21
 ```
+---
+```cpp
+// Subscribing of lambda with multiple parameters:
+
+Delegate<int, float, std::string> del;
+
+auto lambda = [](int x1, float x2, std::string x3)
+{
+    std::cout << "x1 = " << x1 << ", x2 = " << x2 << ", x3 = " << x3 << std::endl;
+};
+
+// Subscribing one lambda with two tuples of parameters for later evaluation.
+del.Subscribe(lambda, {{1, 3.5f, "foo"}, {2, 5.74f, "bar"}});
+
+del.Invoke();
+```
+###### Result
+```cpp
+x1 = 1, x2 = 3.5, x3 = foo
+x1 = 2, x2 = 5.74, x3 = bar
+```
+
 
 #### Calling
 ```cpp
