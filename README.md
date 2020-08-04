@@ -6,6 +6,8 @@
   - [Initialization](#initialization)
   - [Subscribing](#subscribing)
   - [Calling](#calling)
+  - [Duplicating](#duplicating)
+  - [Removing](#removing)
 * [Technologies](#technologies)
 * [Setup](#setup)
 
@@ -170,6 +172,43 @@ int a = del.Invoke();
 
 // Calling all subscribed functions without saved parameters:
 int b = del(a);
+```
+
+#### Duplicating
+```cpp
+Delegate<int> del;
+auto lambda = [](int x) { std::cout << "x = " << x << std::endl; };
+
+del.Subscribe(lambda, {4, 6, 8});
+
+// Duplicating the last subscribed function with the specified integer parameter 8:
+// Note that both  postfix and prefix operators are valid.
+del++;
+
+del.Invoke();
+```
+###### Result
+```cpp
+x = 4
+x = 6
+x = 8
+x = 8
+```
+
+#### Removing
+```cpp
+Delegate<int> del;
+auto lambda = [](int x) { std::cout << "x = " << x << std::endl; };
+
+del.Subscribe(lambda, {4, 6, 8});
+del--;
+
+del.Invoke();
+```
+###### Result
+```cpp
+x = 4
+x = 6
 ```
 
 ## Technologies
