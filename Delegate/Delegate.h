@@ -165,6 +165,61 @@ namespace dw
             return *this;
         }
 
+        DelegateBase &operator++()
+        {
+            if (subscribers.empty())
+            {
+                return *this;
+            }
+
+            DelegateType newDel = subscribers.back();
+
+            if (parameters.empty())
+            {
+                subscribers.push_back(newDel);
+                return *this;
+            }
+
+            subscribers.push_back(newDel);
+            AttachParameters(parameters.back().parameters, std::index_sequence_for<Params...>());
+
+            return *this;
+        }
+
+        DelegateBase &operator++(int)
+        {
+            DelegateBase tmp(*this);
+            operator++();
+            return tmp;
+        }
+
+        DelegateBase &operator--()
+        {
+            if (subscribers.empty())
+            {
+                return *this;
+            }
+
+            if (parameters.empty())
+            {
+                subscribers.pop_back();
+                return *this;
+            }
+
+            int index = parameters.back().index;
+            parameters.pop_back();
+            subscribers.erase(subscribers.begin() + index);
+
+            return *this;
+        }
+
+        DelegateBase &operator--(int)
+        {
+            DelegateBase tmp(*this);
+            operator--();
+            return tmp;
+        }
+
         /**
          * @brief           Signature of comparable delegates must match exactly.
          * @param  &rhs:    Other delegate.
