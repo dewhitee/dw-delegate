@@ -120,17 +120,19 @@ namespace dw
             }
 
             int adjustedCount = count < subscribers.size() ? count : subscribers.size() - 1;
-            for (size_t i = subscribers.size() - 1; i < subscribers.size() - 1 - adjustedCount; ++i)
+
+            for (size_t i = subscribers.size() - 1; i > adjustedCount; --i)
             {
+                std::cout << "Detaching " << i << std::endl;
                 DetachParameters(i);
             }
 
-            int index = 0;
-            for (auto i = subscribers.rbegin(); i != subscribers.rend() + count; ++i)
+            for (int i = 0; i < subscribers.size(); i++) { std::cout << i << std::endl; }
+
+            for (int i = 0; i < adjustedCount; i++)
             {
-                std::cout << "Index = " << index << std::endl;
-                subscribers.erase(std::next(i).base());
-                index++;
+                std::cout << "Popping " << i << std::endl;
+                subscribers.pop_back();
             }
         }
 
@@ -402,12 +404,28 @@ namespace dw
         }
         void DetachParameters(const size_t index)
         {
+            int erasedCount = 0;
+
+            // Removing all parameters with specified index
             parameters.erase(
                 std::remove_if(
                     parameters.begin(),
                     parameters.end(),
-                    [index](const DelegateParams<Params...> &x) { return x.index == index; }),
+                    [index, &erasedCount](const DelegateParams<Params...> &x) {
+                        if (x.index == index)
+                        {
+                            erasedCount++;
+                            return true;
+                        }
+                        return false;
+                    }),
                 parameters.end());
+
+            // Correcting indices of saved parameters
+            for (size_t i = 0; i < parameters.size(); ++i)
+            {
+                parameters[i].index -= erasedCount;
+            }
         }
     };
 
