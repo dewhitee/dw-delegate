@@ -112,8 +112,7 @@ namespace dw
                 int adjustedCount = count < subscribers.size() ? count : subscribers.size() - 1;
                 for (size_t i = 0; i < adjustedCount; ++i)
                 {
-                    std::cout << "Detaching parameters of index " << i << std::endl;
-                    DetachParameters(i);
+                    DetachParameters(0);
                 }
                 subscribers.erase(subscribers.begin(), subscribers.begin() + count);
                 return;
@@ -121,17 +120,21 @@ namespace dw
 
             int adjustedCount = count < subscribers.size() ? count : subscribers.size() - 1;
 
-            for (size_t i = subscribers.size() - 1; i > adjustedCount; --i)
+            // for (size_t i = subscribers.size() - 1; i > adjustedCount; --i)
+            // {
+            //     std::cout << "Detaching " << i << std::endl;
+            //     DetachParameters(i);
+            // }
+            for (size_t i = 0; i < adjustedCount; ++i)
             {
-                std::cout << "Detaching " << i << std::endl;
-                DetachParameters(i);
+                DetachParameters(parameters.size() - 1);
             }
 
-            for (int i = 0; i < subscribers.size(); i++) { std::cout << i << std::endl; }
+            //for (int i = 0; i < subscribers.size(); i++) { std::cout << i << std::endl; }
 
             for (int i = 0; i < adjustedCount; i++)
             {
-                std::cout << "Popping " << i << std::endl;
+                //std::cout << "Popping " << i << std::endl;
                 subscribers.pop_back();
             }
         }
@@ -421,10 +424,16 @@ namespace dw
                     }),
                 parameters.end());
 
+            if (index > 0)
+            {
+                return;
+            }
+
             // Correcting indices of saved parameters
             for (size_t i = 0; i < parameters.size(); ++i)
             {
                 parameters[i].index -= erasedCount;
+                //std::cout << i << "-th parameters index = " << parameters[i].index << std::endl;
             }
         }
     };
