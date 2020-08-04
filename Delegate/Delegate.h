@@ -99,13 +99,77 @@ namespace dw
         }
 
         /**
+         * @brief  
+         * @note   
+         * @param  count:       Count of functions to remove.
+         * @param  fromBack:    If *true* - removing will be performed from back of the subscribers vector.
+         * @retval None
+         */
+        void Remove(int count = 1, bool fromBack = true)
+        {
+            if (!fromBack)
+            {
+                int adjustedCount = count < subscribers.size() ? count : subscribers.size() - 1;
+                for (size_t i = 0; i < adjustedCount; ++i)
+                {
+                    std::cout << "Detaching parameters of index " << i << std::endl;
+                    DetachParameters(i);
+                }
+                subscribers.erase(subscribers.begin(), subscribers.begin() + count);
+                return;
+            }
+
+            int adjustedCount = count < subscribers.size() ? count : subscribers.size() - 1;
+            for (size_t i = subscribers.size() - 1; i < subscribers.size() - 1 - adjustedCount; ++i)
+            {
+                DetachParameters(i);
+            }
+
+            int index = 0;
+            for (auto i = subscribers.rbegin(); i != subscribers.rend() + count; ++i)
+            {
+                std::cout << "Index = " << index << std::endl;
+                subscribers.erase(std::next(i).base());
+                index++;
+            }
+        }
+
+        /**
+         * @brief  Is not implemented yet.
+         * @note   
+         * @param  subscriber: 
+         */
+        void Remove(const DelegateType& subscriber)
+        {
+            std::cout << "Removing " << &subscriber << std::endl;
+            subscribers.erase(
+                std::remove_if(
+                    subscribers.begin(),
+                    subscribers.end(),
+                    [subscriber](const DelegateType& x){return &x == &subscriber;}
+                ), subscribers.end());
+            for (auto i : subscribers)
+            {
+                std::cout << "Address = " << &i << std::endl;
+            }
+        }
+
+        /**
          * @brief           Remove all subscribers of this delegate appearing in the ***subscribers*** parameter.
-         * 
+         * @note            Is not implemented yet.
          * @param  subscribers: *std*::vector of functions that must be removed from the delegate.
          */
-        void Remove(std::vector<DelegateType> subscribers)
+        void Remove(const std::vector<DelegateType>& subscribers)
         {
-            this->subscribers -= subscribers;
+            for (auto& s : subscribers)
+            {
+                this->subscribers.erase(
+                    std::remove_if(
+                        this->subscribers.begin(),
+                        this->subscribers.end(),
+                        [s](const DelegateType& x){return &s == &x;}
+                    ), this->subscribers.end());
+            }
         }
 
         /**
@@ -310,6 +374,14 @@ namespace dw
             return *this;
         }
 
+        void DebugPrintParametersIndices()
+        {
+            for (auto& p : parameters)
+            {
+                std::cout << p.index << std::endl;
+            }
+        }
+
     protected:
         template <size_t... Indices>
         ReturnType HelperInvoke(const std::tuple<Params...> &tuple, int index, std::index_sequence<Indices...>)
@@ -327,6 +399,15 @@ namespace dw
         {
             //std::cout << "Index on subscription: " + std::to_string(subscribers.size() - 1) << std::endl;
             this->parameters.push_back(DelegateParams<Params...>{subscribers.size() - 1, tuple});
+        }
+        void DetachParameters(const size_t index)
+        {
+            parameters.erase(
+                std::remove_if(
+                    parameters.begin(),
+                    parameters.end(),
+                    [index](const DelegateParams<Params...> &x) { return x.index == index; }),
+                parameters.end());
         }
     };
 
