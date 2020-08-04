@@ -233,7 +233,7 @@ std::cout << "\nAfter removing 1 function from the end:" << std::endl;
 del.Invoke();
 
 // Removing 2 functions from the beginning:
-del.Remove(1, false);
+del.Remove(2, false);
 
 std::cout << "\nAfter removing 2 functions from the beginning: " << std::endl;
 del.Invoke();
