@@ -201,6 +201,8 @@ Delegate<int> del;
 auto lambda = [](int x) { std::cout << "x = " << x << std::endl; };
 
 del.Subscribe(lambda, {4, 6, 8});
+
+// Removing last subscribed function from the delegate.
 del--;
 
 del.Invoke();
