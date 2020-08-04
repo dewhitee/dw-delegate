@@ -36,6 +36,7 @@ RetDelegate<void, int&> badDelegate; // Note that you can't initialize RetDelega
 // Initialization of SimpleDelegate with one parameter.
 SimpleDelegate<int> del4;
 ```
+
 #### Subscribing
 ```cpp
 // Subscribing lambda to the delegate without specifying - saving any arguments - for lazy evaluation:
@@ -64,7 +65,9 @@ Delegate<int> del;
 auto lambda1 = [](int x) { std::cout << "First lambda x = " << x << std::endl; };
 auto lambda2 = [](int x) { std::cout << "Second lambda x = " << x << std::endl; };
 auto lambda3 = [](int x) { std::cout << "Third lambda x = " << x << std::endl; };
+```
 
+```cpp
 // Subscribing with initializer list
 del += {lambda1, lambda2, lambda3};
 
@@ -76,7 +79,7 @@ First lambda x = 4
 Second lambda x = 4
 Third lambda x = 4
 ```
-
+---
 ```cpp
 // Subscribing with Subscribe() method, passing parameters to be evaluated by choosen lambda function when the Invoke() method will be called.
 del.Subscribe(lambda1, {10, 13, 15});
@@ -89,7 +92,19 @@ First lambda x = 10
 First lambda x = 13
 First lambda x = 15
 ```
+---
+```cpp
+// Subscribing several lambdas with Subscribe() method, passing one integer parameter to be evaluated later on Invoke() method.
+del.Subscribe({lambda1, lambda2, lambda3}, 21);
 
+del.Invoke();
+```
+###### Result
+```cpp
+First lambda x = 21
+Second lambda x = 21
+Third lambda x = 21
+```
 
 #### Calling
 ```cpp
