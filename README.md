@@ -261,6 +261,9 @@ y = -5
 ```
 
 ### Combining
+You can combine two delegates subscribed functions by using Combine() method.
+
+Note: Combining is performed for the delegate that calls the Combine() method only, so other (second) delegate will not be updated.
 ```cpp
 Delegate<int> del1;
 Delegate<int> del2;
@@ -288,6 +291,9 @@ y = -6
 ```
 
 ### Shifting
+You can transfer all subscribed functions, with the parameters that were saved, from one delegate to another by using the overloaded right and left shift operators. All subscribed methods of delegate from which shift was applied will be cleared. For example, considering that delegates have matching signature, this line of code: ```delegate1 >> delegate2;```, will transfer all methods of ```delegate1``` to ```delegate2```, and clear all the subscribed methods of ```delegate1```.
+
+Note: Both delegates must have the same signature.
 ```cpp
 Delegate<int> del1;
 Delegate<int> del2;
