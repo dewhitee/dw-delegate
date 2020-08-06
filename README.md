@@ -8,6 +8,7 @@
   - [Calling](#calling)
   - [Duplicating](#duplicating)
   - [Removing](#removing)
+  - [Combining](#combining)
 * [Technologies](#technologies)
 * [Setup](#setup)
 
@@ -256,6 +257,33 @@ y = -5
 After removing 2 functions from the beginning:
 x = 8
 y = -5
+```
+
+#### Combining
+```cpp
+Delegate<int> del1;
+Delegate<int> del2;
+
+auto lambda1 = [](int x) { std::cout << "x = " << x << std::endl; };
+auto lambda2 = [](int y) { std::cout << "y = " << y << std::endl; };
+
+// Subscribing first lambda with two different parameters for later evaluation to the first delegate.
+del1.Subscribe(lambda1, {10, 15});
+
+// Subscribing second lambda with two different parameters for later evaluation to the second delegate.
+del2.Subscribe(lambda2, {-2, -6});
+
+// Combining first delegate with the second delegate.
+del1.Combine(del2);
+
+del1.Invoke();
+```
+###### Result
+```cpp
+x = 10
+x = 15
+y = -2
+y = -6
 ```
 
 ## Technologies
