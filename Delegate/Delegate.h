@@ -48,6 +48,7 @@ namespace dw
             for (size_t i = 0; i < other.subscribers.size(); i++)
             {
                 this->subscribers.push_back(other.subscribers[i]);
+                AttachParameters(other.parameters[i].parameters, std::index_sequence_for<Params...>());
             }
         }
 
