@@ -9,6 +9,7 @@
   - [Duplicating](#duplicating)
   - [Removing](#removing)
   - [Combining](#combining)
+  - [Shifting](#shifting)
 * [Technologies](#technologies)
 * [Setup](#setup)
 
@@ -280,6 +281,58 @@ del1.Invoke();
 ```
 ###### Result
 ```cpp
+x = 10
+x = 15
+y = -2
+y = -6
+```
+
+### Shifting
+```cpp
+Delegate<int> del1;
+Delegate<int> del2;
+
+auto lambda1 = [](int x) { std::cout << "x = " << x << std::endl; };
+auto lambda2 = [](int y) { std::cout << "y = " << y << std::endl; };
+
+del1.Subscribe(lambda1, {10, 15});
+del2.Subscribe(lambda2, {-2, -6});
+
+del1 << del2;
+
+std::cout << "\nFirst delegate: " << std::endl;
+del1.Invoke();
+
+std::cout << "\nSecond delegate: None" << std::endl;
+del2.Invoke();
+```
+###### Result
+```cpp
+First delegate:
+x = 10
+x = 15
+y = -2
+y = -6
+
+Second delegate: None
+```
+
+```cpp
+// ...
+
+del1 >> del2;
+
+std::cout << "\nFirst delegate: None" << std::endl;
+del1.Invoke();
+
+std::cout << "\nSecond delegate: " << std::endl;
+del2.Invoke();
+```
+###### Result
+```cpp
+First delegate: None
+
+Second delegate:
 x = 10
 x = 15
 y = -2
