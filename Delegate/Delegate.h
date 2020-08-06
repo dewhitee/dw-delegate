@@ -108,9 +108,10 @@ namespace dw
          */
         void Remove(int count = 1, bool fromBack = true)
         {
+            int adjustedCount = count < subscribers.size() ? count : subscribers.size() - 1;
+
             if (!fromBack)
             {
-                int adjustedCount = count < subscribers.size() ? count : subscribers.size() - 1;
                 for (size_t i = 0; i < adjustedCount; ++i)
                 {
                     DetachParameters(0);
@@ -119,23 +120,13 @@ namespace dw
                 return;
             }
 
-            int adjustedCount = count < subscribers.size() ? count : subscribers.size() - 1;
-
-            // for (size_t i = subscribers.size() - 1; i > adjustedCount; --i)
-            // {
-            //     std::cout << "Detaching " << i << std::endl;
-            //     DetachParameters(i);
-            // }
             for (size_t i = 0; i < adjustedCount; ++i)
             {
                 DetachParameters(parameters.size() - 1);
             }
 
-            //for (int i = 0; i < subscribers.size(); i++) { std::cout << i << std::endl; }
-
-            for (int i = 0; i < adjustedCount; i++)
+            for (size_t i = 0; i < adjustedCount; i++)
             {
-                //std::cout << "Popping " << i << std::endl;
                 subscribers.pop_back();
             }
         }
@@ -374,8 +365,8 @@ namespace dw
         {
             if (this != &rhs)
             {
-                rhs.Combine(this);
-                Clear();
+                rhs.Combine(*this);
+                this->Clear();
             }
             return *this;
         }
@@ -434,7 +425,6 @@ namespace dw
             for (size_t i = 0; i < parameters.size(); ++i)
             {
                 parameters[i].index -= erasedCount;
-                //std::cout << i << "-th parameters index = " << parameters[i].index << std::endl;
             }
         }
     };
