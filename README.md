@@ -8,6 +8,8 @@
   - [Calling](#calling)
   - [Duplicating](#duplicating)
   - [Removing](#removing)
+  - [Combining](#combining)
+  - [Shifting](#shifting)
 * [Technologies](#technologies)
 * [Setup](#setup)
 
@@ -28,7 +30,7 @@ C#-like delegate for C++.
 
 using namespace dw;
 ```
-#### Initialization
+### Initialization
 ```cpp
 // Initializing delegates:
 
@@ -47,7 +49,7 @@ RetDelegate<void, int&> badDelegate; // Note that you can't initialize RetDelega
 SimpleDelegate<int> del4;
 ```
 
-#### Subscribing
+### Subscribing
 ```cpp
 // Subscribing lambda to the delegate without specifying parameters for later evaluation:
 
@@ -140,7 +142,7 @@ x1 = 2, x2 = 5.74, x3 = bar
 ```
 
 
-#### Calling
+### Calling
 ```cpp
 // Calling subscribed functions of delegate with one parameter:
 
@@ -174,7 +176,7 @@ int a = del.Invoke();
 int b = del(a);
 ```
 
-#### Duplicating
+### Duplicating
 ```cpp
 Delegate<int> del;
 auto lambda = [](int x) { std::cout << "x = " << x << std::endl; };
@@ -195,7 +197,7 @@ x = 8
 x = 8
 ```
 
-#### Removing
+### Removing
 ```cpp
 Delegate<int> del;
 auto lambda = [](int x) { std::cout << "x = " << x << std::endl; };
@@ -256,6 +258,91 @@ y = -5
 After removing 2 functions from the beginning:
 x = 8
 y = -5
+```
+
+### Combining
+You can combine two delegates subscribed functions by using Combine() method.
+
+Note: Combining is performed for the delegate that calls the Combine() method only, so other (second) delegate will not be updated.
+```cpp
+Delegate<int> del1;
+Delegate<int> del2;
+
+auto lambda1 = [](int x) { std::cout << "x = " << x << std::endl; };
+auto lambda2 = [](int y) { std::cout << "y = " << y << std::endl; };
+
+// Subscribing first lambda with two different parameters for later evaluation to the first delegate.
+del1.Subscribe(lambda1, {10, 15});
+
+// Subscribing second lambda with two different parameters for later evaluation to the second delegate.
+del2.Subscribe(lambda2, {-2, -6});
+
+// Combining first delegate with the second delegate.
+del1.Combine(del2);
+
+del1.Invoke();
+```
+###### Result
+```cpp
+x = 10
+x = 15
+y = -2
+y = -6
+```
+
+### Shifting
+You can transfer all subscribed functions, with the parameters that were saved, from one delegate to another by using the overloaded right and left shift operators. All subscribed methods of delegate from which shift was applied will be cleared. For example, considering that delegates have matching signature, this line of code: ```delegate1 >> delegate2;```, will transfer all methods of ```delegate1``` to ```delegate2```, and clear all the subscribed methods of ```delegate1```.
+
+Note: Both delegates must have the same signature.
+```cpp
+Delegate<int> del1;
+Delegate<int> del2;
+
+auto lambda1 = [](int x) { std::cout << "x = " << x << std::endl; };
+auto lambda2 = [](int y) { std::cout << "y = " << y << std::endl; };
+
+del1.Subscribe(lambda1, {10, 15});
+del2.Subscribe(lambda2, {-2, -6});
+
+del1 << del2;
+
+std::cout << "\nFirst delegate: " << std::endl;
+del1.Invoke();
+
+std::cout << "\nSecond delegate: None" << std::endl;
+del2.Invoke();
+```
+###### Result
+```cpp
+First delegate:
+x = 10
+x = 15
+y = -2
+y = -6
+
+Second delegate: None
+```
+
+```cpp
+// ...
+
+del1 >> del2;
+
+std::cout << "\nFirst delegate: None" << std::endl;
+del1.Invoke();
+
+std::cout << "\nSecond delegate: " << std::endl;
+del2.Invoke();
+```
+###### Result
+```cpp
+First delegate: None
+
+Second delegate:
+x = 10
+x = 15
+y = -2
+y = -6
 ```
 
 ## Technologies
