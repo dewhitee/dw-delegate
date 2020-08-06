@@ -29,7 +29,7 @@ C#-like delegate for C++.
 
 using namespace dw;
 ```
-#### Initialization
+### Initialization
 ```cpp
 // Initializing delegates:
 
@@ -48,7 +48,7 @@ RetDelegate<void, int&> badDelegate; // Note that you can't initialize RetDelega
 SimpleDelegate<int> del4;
 ```
 
-#### Subscribing
+### Subscribing
 ```cpp
 // Subscribing lambda to the delegate without specifying parameters for later evaluation:
 
@@ -141,7 +141,7 @@ x1 = 2, x2 = 5.74, x3 = bar
 ```
 
 
-#### Calling
+### Calling
 ```cpp
 // Calling subscribed functions of delegate with one parameter:
 
@@ -175,7 +175,7 @@ int a = del.Invoke();
 int b = del(a);
 ```
 
-#### Duplicating
+### Duplicating
 ```cpp
 Delegate<int> del;
 auto lambda = [](int x) { std::cout << "x = " << x << std::endl; };
@@ -196,7 +196,7 @@ x = 8
 x = 8
 ```
 
-#### Removing
+### Removing
 ```cpp
 Delegate<int> del;
 auto lambda = [](int x) { std::cout << "x = " << x << std::endl; };
@@ -259,7 +259,7 @@ x = 8
 y = -5
 ```
 
-#### Combining
+### Combining
 ```cpp
 Delegate<int> del1;
 Delegate<int> del2;
