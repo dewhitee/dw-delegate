@@ -5,6 +5,7 @@
 #include <tuple>
 #include <any>
 #include <type_traits>
+#include <iostream>
 
 namespace dw
 {
@@ -69,7 +70,7 @@ namespace dw
 
         void Subscribe(const std::initializer_list<DelegateType> &delegates, Params... params)
         {
-            for (auto&& d : delegates)
+            for (auto &&d : delegates)
             {
                 this->subscribers.push_back(d);
                 AttachParameters(std::tuple<Params...>(params...), std::index_sequence_for<Params...>());
@@ -94,7 +95,7 @@ namespace dw
             {
                 //std::cout << "Index of subscribed function = " << parameters[i].index << std::endl;
                 HelperInvoke(parameters[i].parameters, parameters[i].index,
-                     std::index_sequence_for<Params...>());
+                             std::index_sequence_for<Params...>());
             }
             return;
         }
@@ -136,15 +137,15 @@ namespace dw
          * @note   
          * @param  subscriber: 
          */
-        void Remove(const DelegateType& subscriber)
+        void Remove(const DelegateType &subscriber)
         {
             std::cout << "Removing " << &subscriber << std::endl;
             subscribers.erase(
                 std::remove_if(
                     subscribers.begin(),
                     subscribers.end(),
-                    [subscriber](const DelegateType& x){return &x == &subscriber;}
-                ), subscribers.end());
+                    [subscriber](const DelegateType &x) { return &x == &subscriber; }),
+                subscribers.end());
             for (auto i : subscribers)
             {
                 std::cout << "Address = " << &i << std::endl;
@@ -156,16 +157,16 @@ namespace dw
          * @note            Is not implemented yet.
          * @param  subscribers: *std*::vector of functions that must be removed from the delegate.
          */
-        void Remove(const std::vector<DelegateType>& subscribers)
+        void Remove(const std::vector<DelegateType> &subscribers)
         {
-            for (auto& s : subscribers)
+            for (auto &s : subscribers)
             {
                 this->subscribers.erase(
                     std::remove_if(
                         this->subscribers.begin(),
                         this->subscribers.end(),
-                        [s](const DelegateType& x){return &s == &x;}
-                    ), this->subscribers.end());
+                        [s](const DelegateType &x) { return &s == &x; }),
+                    this->subscribers.end());
             }
         }
 
@@ -373,7 +374,7 @@ namespace dw
 
         void DebugPrintParametersIndices()
         {
-            for (auto& p : parameters)
+            for (auto &p : parameters)
             {
                 std::cout << p.index << std::endl;
             }
@@ -394,7 +395,6 @@ namespace dw
         template <size_t... Indices>
         void AttachParameters(const std::tuple<Params...> &tuple, std::index_sequence<Indices...>)
         {
-            //std::cout << "Index on subscription: " + std::to_string(subscribers.size() - 1) << std::endl;
             this->parameters.push_back(DelegateParams<Params...>{subscribers.size() - 1, tuple});
         }
         void DetachParameters(const size_t index)
@@ -451,7 +451,7 @@ namespace dw
          */
         void operator()(Params... params)
         {
-            for (auto&& i : subscribers)
+            for (auto &&i : subscribers)
             {
                 i(params...);
             }
@@ -470,6 +470,7 @@ namespace dw
     class RetDelegate : public DelegateBase<ReturnType, Params...>
     {
         static_assert(!std::is_void<ReturnType>::value, "RetDelegate can't have void return type!");
+
     public:
         using Parent = DelegateBase<ReturnType, Params...>;
         using Parent::Clear;
@@ -488,7 +489,6 @@ namespace dw
             ReturnType result = ReturnType();
             for (size_t i = 0; i < parameters.size(); i++)
             {
-                //std::cout << "Index of subscribed function = " << parameters[i].index << std::endl;
                 result += HelperInvoke(parameters[i].parameters, i, std::index_sequence_for<Params...>());
             }
             return result;
@@ -503,14 +503,14 @@ namespace dw
         ReturnType operator()(Params... params)
         {
             ReturnType sum = ReturnType();
-            for (auto&& i : subscribers)
+            for (auto &&i : subscribers)
             {
                 sum += i(params...);
             }
             return sum;
         }
     };
-    
+
     template <typename... Params>
     class SimpleDelegate
     {
@@ -532,7 +532,7 @@ namespace dw
          */
         void operator()(Params... params)
         {
-            for (auto&& i : subscribers)
+            for (auto &&i : subscribers)
             {
                 i(params...);
             }
@@ -560,6 +560,64 @@ namespace dw
         {
             subscribers.erase(std::remove(subscribers.begin(), subscribers.end(), rhs), subscribers.end());
             return *this;
+        }
+    };
+
+    template <typename ReturnType, typename ObjType, typename... Params>
+    class MemberDelegate
+    {
+        template <typename... T>
+        struct MemberDelegateParams
+        {
+            int index = -1;
+            ObjType *object;
+            std::tuple<T...> parameters;
+        };
+
+    public:
+        typedef ReturnType (ObjType::*MemberDelegateType)(Params...);
+
+    protected:
+        /**
+         * @brief           **std::vector** of functions that are subscribed to this delegate.
+         */
+        std::vector<MemberDelegateType> subscribers;
+
+        /**
+         * @brief           Vector of parameters saved when each function is subscribed to this delegate.
+         */
+        std::vector<MemberDelegateParams<Params...>> parameters;
+
+    public:
+        void Subscribe(ObjType *obj, const MemberDelegateType &delegate, Params... params)
+        {
+            this->subscribers.push_back(delegate);
+            AttachParameters(obj, std::tuple<Params...>(params...), std::index_sequence_for<Params...>());
+        }
+
+        void Invoke()
+        {
+            for (size_t i = 0; i < parameters.size(); i++)
+            {
+                HelperMemberInvoke(parameters[i].object, parameters[i].parameters, i, std::index_sequence_for<Params...>());
+            }
+            return;
+        }
+
+    private:
+        template <size_t... Indices>
+        void HelperMemberInvoke(ObjType *obj, const std::tuple<Params...> &tuple, int index, std::index_sequence<Indices...>)
+        {
+            (obj->*subscribers[index])(std::get<Indices>(tuple)...);
+        }
+        void AttachParameters(ObjType *obj, Params... params)
+        {
+            this->parameters.push_back(MemberDelegateParams<Params...>{subscribers.size() - 1, obj, params...});
+        }
+        template <size_t... Indices>
+        void AttachParameters(ObjType *obj, const std::tuple<Params...> &tuple, std::index_sequence<Indices...>)
+        {
+            this->parameters.push_back(MemberDelegateParams<Params...>{subscribers.size() - 1, obj, tuple});
         }
     };
 
