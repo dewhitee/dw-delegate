@@ -36,10 +36,10 @@ parameters   | std::vector<DelegateParams<Params...>>              | Vector of p
 #### Methods:
 Method name: | Return Type: | Parameters:                                                            | Description
 -------------|--------------|------------------------------------------------------------------------|------------
-Combine      | void         | const DelegateBase& other                                              | [Subscribes](#subscribe) all functions (subscribers) from other delegate to this delegate
-Subscribe    | void         | const DelegateType& delegate, Params... params                         |
-Subscribe    | void         | const std::initializer_list<DelegateType>& delegates, Params... params |
-Subscribe    | void         | const DelegateType& delegate, std::vector<std::tuple<Params...>> params| 
+Combine      | void         | const DelegateBase& other                                              | [Subscribes](#subscribing) all functions (subscribers) from other delegate to this delegate
+Subscribe    | void         | const DelegateType& delegate, Params... params                         | [Subscribes](#subscribing) single function and saves single parameters pack.
+Subscribe    | void         | const std::initializer_list<DelegateType>& delegates, Params... params | [Subscribes](#subscribing) multiple functions and saves single parameters pack.
+Subscribe    | void         | const DelegateType& delegate, std::vector<std::tuple<Params...>> params| [Subscribes](#subscribing) single function and saves multiple parameters packs.
 Invoke       | void         | *none*                                                                 | [Call](#calling) all subscribed functions of this delegate that have parameters saved on Subscribe() method.
 Remove       | void         | int count = 1, bool fromBack = true                                    | [Remove](#removing) *count* functions from the back (fromBack == true) or front (fromBack == false).
 Clear        | void         | *none*                                                                 | [Removes](#removing) all subscribed functions and parameters from this delegate.
