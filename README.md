@@ -1,7 +1,7 @@
 # dw-delegate
 ## Table of contents
 * [General info](#general-info)
-* [Contains](#contains)
+* [API](#api)
 * [Examples](#examples)
   - [Initialization](#initialization)
   - [Subscribing](#subscribing)
@@ -14,26 +14,122 @@
 * [Setup](#setup)
 
 ## General info
-C#-like delegate for C++.
+Small header-only templates library for C#-like delegate.
 
-#### Contains
+# API
 ###### Note: All classes are templates.
-* ***DelegateBase < ReturnType, Params... >***          -   Abstract base (parent) class of (almost) all delegates.
-* ***Delegate < void, Params... >***                    -   Main delegate class.
-* ***RetDelegate < ReturnType, Params... >***           -   Same as ***Delegate***, but can have a custom *ReturnType* specified as template parameter.
-* ***SimpleDelegate < Params... >***                    -   Type of delegate that can't have subscribed functions with saved arguments for lazy evaluation. Is more memory efficient than Delegate or RetDelegate.
-* ***DelegateVisualizer < ReturnType, Params... >***    -   Utility class that can visualize delegate's data.
+### DelegateBase
+Abstract base (parent) class of (almost) all delegates.
 
-### Examples
+```cpp
+template <typename ReturnType, typename... Params>
+class DelegateBase
+...
+```
+
+#### Fields:
+Field name:  | Type:                                               | Description
+-------------|-----------------------------------------------------|------------
+subscribers  | `std::vector<DelegateType>`                         | Vector of functions [subscribed](#subscribing) to this delegate
+parameters   | `std::vector<DelegateParams<Params...>>`            | Vector of parameters passed with the Subscribe() method.
+
+#### Methods:
+Method name: | Return Type:   | Parameters:                                                            | Description
+-------------|----------------|------------------------------------------------------------------------|------------
+Combine      | `void`         | const DelegateBase& other                                              | [Subscribes](#subscribing) all functions (subscribers) from other delegate to this delegate
+Subscribe    | `void`         | const DelegateType& delegate, Params... params                         | [Subscribes](#subscribing) single function and saves single parameters pack.
+Subscribe    | `void`         | const std::initializer_list<DelegateType>& delegates, Params... params | [Subscribes](#subscribing) multiple functions and saves single parameters pack.
+Subscribe    | `void`         | const DelegateType& delegate, std::vector<std::tuple<Params...>> params| [Subscribes](#subscribing) single function and saves multiple parameters packs.
+Invoke       | `void`         | *none*                                                                 | [Call](#calling) all subscribed functions of this delegate that have parameters saved on Subscribe() method.
+Remove       | `void`         | int count = 1, bool fromBack = true                                    | [Remove](#removing) *count* functions from the back (fromBack == true) or front (fromBack == false).
+Clear        | `void`         | *none*                                                                 | [Removes](#removing) all subscribed functions and parameters from this delegate.
+operator+=   | `DelegateBase&`| const DelegateType& rhs                                                | [Subscribes](#subscribe) function to this delegate.
+operator+=   | `DelegateBase&`| const std::initializer_list<DelegateType>& rhs                         | [Subscribes](#subscribe) multiple functions to this delegate.
+operator-=   | `DelegateBase&`| const DelegateType& rhs                                                | Unsubscribes choosen function from this delegate.
+operator++   | `DelegateBase&`| *none*                                                                 | Prefix version for [duplicating](#duplicating) delegate's last subscribed function.
+operator++   | `DelegateBase&`| int                                                                    | Postfix version for [duplicating](#duplicating) delegate's last subscribed function.
+operator--   | `DelegateBase&`| *none*                                                                 | Prefix version for [removing](#removing) delegate's last subscribed function.
+operator--   | `DelegateBase&`| int                                                                    | Postfix version for [removing](#removing) delegate's last subscribed function.
+operator==   | `const bool`   | const DelegateBase& rhs                                                | Compares subscribers of other delegate to subscribers of this delegate.
+operator<    | `const bool`   | const DelegateBase& rhs                                                | Compares the size of subscribers vector of both delegates.
+operator>    | `const bool`   | const DelegateBase& rhs                                                | Compares the size of subscribers vector of both delegates.
+operator<<   | `DelegateBase&`| const DelegateBase& rhs                                                | [Transfer](#shifting) all subscribers of other delegate to this delegate. Will clear subscribers from other delegate.
+operator>>   | `DelegateBase&`| const DelegateBase& rhs                                                | [Transfer](#shifting) all subscribers of this delegate to other delegate. Will clear subscribers from this delegate.
+  
+### Delegate
+Main delegate class.
+
+```cpp
+template <typename... Params>
+class Delegate : public DelegateBase<void, Params...>
+...
+```
+#### Methods:
+Method name: | Return Type: | Parameters:                                                            | Description
+-------------|--------------|------------------------------------------------------------------------|------------
+operator()   | `void`       | Params... params                                                       | [Invokes](#calling) all subscribed functions with the specified `params`.
+
+### RetDelegate
+Same as [Delegate](#delegate), but can have a custom *ReturnType* specified as template parameter.
+```cpp
+template <typename ReturnType, typename... Params>
+class RetDelegate : public DelegateBase<ReturnType, Params...>
+...
+```
+#### Methods:
+Method name: | Return Type: | Parameters:                                                            | Description
+-------------|--------------|------------------------------------------------------------------------|------------
+Invoke       | `ReturnType` | *none*                                                                 | [Invokes](#calling) all functions of this delegate that were subscribed with `Subscribe()` method.
+operator()   | `ReturnType` | Params... params                                                       | [Invokes](#calling) all subscribed functions with the specified `params`. Returns the sum of all invoked functions results.
+
+### SimpleDelegate
+Type of delegate that don't have ability to save parameters through Subscribe() method. Is more memory efficient than Delegate or RetDelegate.
+```cpp
+template <typename... Params>
+class SimpleDelegate
+...
+```
+#### Fields:
+Field name:  | Type:                                               | Description
+-------------|-----------------------------------------------------|------------
+subscribers  | `std::vector<DelegateType>`                         | Vector of functions subscribed to this delegate
+
+#### Methods:
+Method name: | Return Type:      | Parameters:                                                            | Description
+-------------|-------------------|------------------------------------------------------------------------|------------
+operator()   | `ReturnType`      | Params... params                                                       | [Invokes](#calling) all subscribed functions with the specified `params`. 
+operator+=   | `SimpleDelegate&` | const DelegateType& rhs                                                | [Subscribes](#subscribing) function to this delegate.
+operator-=   | `SimpleDelegate&` | const DelegateType& rhs                                                | Unsubscribes choosen function from this delegate.
+
+### MemberDelegate
+Delegate that holds the subscribed member functions.
+```cpp
+template <typename ReturnType, typename ObjType, typename... Params>
+class MemberDelegate
+...
+```
+#### Fields:
+Field name:  | Type:                                               | Description
+-------------|-----------------------------------------------------|------------
+subscribers  | `std::vector<MemberDelegateType>`                   | Vector of functions subscribed to this delegate
+parameters   | `std::vector<MemberDelegateParams<Params...>>`      | Vector of parameters passed with the Subscribe() method. 
+
+#### Methods:
+Method name: | Return Type:      | Parameters:                                                            | Description
+-------------|-------------------|------------------------------------------------------------------------|------------
+Subscribe    | `void`            | Params... params                                                       | [Invokes](#calling) all subscribed functions with the specified `params`. 
+Invoke       | `void`            | const DelegateType& rhs                                                | [Subscribes](#subscribing) function to this delegate.
+operator-=   | `SimpleDelegate&` | const DelegateType& rhs                                                | Unsubscribes choosen function from this delegate.
+
+## Examples
 ```cpp
 #include "Delegate\Delegate.h"
 
 using namespace dw;
 ```
 ### Initialization
+Initializing delegates:
 ```cpp
-// Initializing delegates:
-
 // Initialization of delegate with void return type and no parameters.
 Delegate del1;
 
@@ -50,18 +146,15 @@ SimpleDelegate<int> del4;
 ```
 
 ### Subscribing
+Subscribing lambda to the delegate without specifying parameters:
 ```cpp
-// Subscribing lambda to the delegate without specifying parameters for later evaluation:
-
 Delegate<int&> del;
 auto lambda = [](int& x) { x++; };
 
 del += lambda;
 ```
-
+Subscribing lambda to the delegate with specified parameters:
 ```cpp
-// Subscribing lambda to the delegate with specified parameters:
-
 Delegate<int&> del;
 auto lambda = [](int& x) { x++; };
 
@@ -70,19 +163,16 @@ int y = 0;
 del.Subscribe(lambda, y);
 // Then Invoke() method will call this lambda function with the 'y' as parameter.
 ```
-
+Subscribe several different functions using initializer list:
 ```cpp
-// Subscribe several different functions using initializer list:
-
 Delegate<int> del;
 
 auto lambda1 = [](int x) { std::cout << "First lambda x = " << x << std::endl; };
 auto lambda2 = [](int x) { std::cout << "Second lambda x = " << x << std::endl; };
 auto lambda3 = [](int x) { std::cout << "Third lambda x = " << x << std::endl; };
 ```
-
+Subscribing with initializer list
 ```cpp
-// Subscribing with initializer list
 del += {lambda1, lambda2, lambda3};
 
 del(4);
@@ -94,8 +184,8 @@ Second lambda x = 4
 Third lambda x = 4
 ```
 ---
+Subscribing with Subscribe() method, passing parameters to be evaluated by choosen lambda function when the Invoke() method will be called:
 ```cpp
-// Subscribing with Subscribe() method, passing parameters to be evaluated by choosen lambda function when the Invoke() method will be called.
 del.Subscribe(lambda1, {10, 13, 15});
 
 del.Invoke();
@@ -107,8 +197,8 @@ First lambda x = 13
 First lambda x = 15
 ```
 ---
+Subscribing several lambdas with Subscribe() method, passing one integer parameter to be evaluated later on Invoke() method:
 ```cpp
-// Subscribing several lambdas with Subscribe() method, passing one integer parameter to be evaluated later on Invoke() method.
 del.Subscribe({lambda1, lambda2, lambda3}, 21);
 
 del.Invoke();
@@ -120,9 +210,8 @@ Second lambda x = 21
 Third lambda x = 21
 ```
 ---
+Subscribing lambda with multiple parameters:
 ```cpp
-// Subscribing of lambda with multiple parameters:
-
 Delegate<int, float, std::string> del;
 
 auto lambda = [](int x1, float x2, std::string x3)
@@ -143,9 +232,8 @@ x1 = 2, x2 = 5.74, x3 = bar
 
 
 ### Calling
+Calling subscribed functions of delegate with one parameter:
 ```cpp
-// Calling subscribed functions of delegate with one parameter:
-
 Delegate<int&> del;
 auto lambda = [](int& x) { x++; };
 
@@ -160,9 +248,8 @@ int z = 0;
 del(z);
 ```
 
+Calling subscribed functions of delegate returning integer with one parameter:
 ```cpp
-// Calling subscribed functions of delegate returning integer with one parameter:
-
 RetDelegate<int, int&> del;
 auto lambda = [](int& x) -> int { return x; };
 
@@ -184,7 +271,7 @@ auto lambda = [](int x) { std::cout << "x = " << x << std::endl; };
 del.Subscribe(lambda, {4, 6, 8});
 
 // Duplicating the last subscribed function with the specified integer parameter 8:
-// Note that both  postfix and prefix operators are valid.
+// Note that both postfix and prefix operators are valid.
 del++;
 
 del.Invoke();
@@ -215,9 +302,8 @@ x = 4
 x = 6
 ```
 ---
+Removing n functions from the delegate from end or beginning.
 ```cpp
-// Removing n functions from the delegate from end or beginning.
-
 Delegate<int> del;
 auto lambda1 = [](int x) { std::cout << "x = " << x << std::endl; };
 auto lambda2 = [](int y) { std::cout << "y = " << y << std::endl; };
