@@ -30,8 +30,8 @@ class DelegateBase
 #### Fields:
 Field name:  | Type:                                               | Description
 -------------|-----------------------------------------------------|------------
-subscribers  | std::vector<DelegateType>                           | Vector of functions subscribed to this delegate
-parameters   | std::vector<DelegateParams<Params...>>              | Vector of parameters passed with the Subscribe() method.
+subscribers  | `std::vector<DelegateType>`                         | Vector of functions subscribed to this delegate
+parameters   | `std::vector<DelegateParams<Params...>>`            | Vector of parameters passed with the Subscribe() method.
 
 #### Methods:
 Method name: | Return Type: | Parameters:                                                            | Description
