@@ -94,8 +94,8 @@ Second lambda x = 4
 Third lambda x = 4
 ```
 ---
+Subscribing with Subscribe() method, passing parameters to be evaluated by choosen lambda function when the Invoke() method will be called:
 ```cpp
-// Subscribing with Subscribe() method, passing parameters to be evaluated by choosen lambda function when the Invoke() method will be called.
 del.Subscribe(lambda1, {10, 13, 15});
 
 del.Invoke();
@@ -107,8 +107,8 @@ First lambda x = 13
 First lambda x = 15
 ```
 ---
+Subscribing several lambdas with Subscribe() method, passing one integer parameter to be evaluated later on Invoke() method:
 ```cpp
-// Subscribing several lambdas with Subscribe() method, passing one integer parameter to be evaluated later on Invoke() method.
 del.Subscribe({lambda1, lambda2, lambda3}, 21);
 
 del.Invoke();
@@ -120,9 +120,8 @@ Second lambda x = 21
 Third lambda x = 21
 ```
 ---
+Subscribing lambda with multiple parameters:
 ```cpp
-// Subscribing of lambda with multiple parameters:
-
 Delegate<int, float, std::string> del;
 
 auto lambda = [](int x1, float x2, std::string x3)
@@ -143,9 +142,8 @@ x1 = 2, x2 = 5.74, x3 = bar
 
 
 ### Calling
+Calling subscribed functions of delegate with one parameter:
 ```cpp
-// Calling subscribed functions of delegate with one parameter:
-
 Delegate<int&> del;
 auto lambda = [](int& x) { x++; };
 
@@ -160,9 +158,8 @@ int z = 0;
 del(z);
 ```
 
+Calling subscribed functions of delegate returning integer with one parameter:
 ```cpp
-// Calling subscribed functions of delegate returning integer with one parameter:
-
 RetDelegate<int, int&> del;
 auto lambda = [](int& x) -> int { return x; };
 
@@ -215,9 +212,8 @@ x = 4
 x = 6
 ```
 ---
+Removing n functions from the delegate from end or beginning.
 ```cpp
-// Removing n functions from the delegate from end or beginning.
-
 Delegate<int> del;
 auto lambda1 = [](int x) { std::cout << "x = " << x << std::endl; };
 auto lambda2 = [](int y) { std::cout << "y = " << y << std::endl; };
