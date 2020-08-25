@@ -36,25 +36,25 @@ parameters   | std::vector<DelegateParams<Params...>>              | Vector of p
 #### Methods:
 Method name: | Return Type: | Parameters:                                                            | Description
 -------------|--------------|------------------------------------------------------------------------|------------
-Combine      | void         | const DelegateBase& other                                              | Subscribes all functions (subscribers) from other delegate to this delegate
+Combine      | void         | const DelegateBase& other                                              | [Subscribes](#subscribe) all functions (subscribers) from other delegate to this delegate
 Subscribe    | void         | const DelegateType& delegate, Params... params                         |
 Subscribe    | void         | const std::initializer_list<DelegateType>& delegates, Params... params |
 Subscribe    | void         | const DelegateType& delegate, std::vector<std::tuple<Params...>> params| 
-Invoke       | void         | *none*                                                                 | Call all subscribed functions of this delegate that have parameters saved on Subscribe() method.
-Remove       | void         | int count = 1, bool fromBack = true                                    | Remove *count* functions from the back (fromBack == true) or front (fromBack == false).
-Clear        | void         | *none*                                                                 | Removes all subscribed functions and parameters from this delegate.
-operator+=   | DelegateBase&| const DelegateType& rhs                                                | Subscribes function to this delegate.
-operator+=   | DelegateBase&| const std::initializer_list<DelegateType>& rhs                         | Subscribes multiple functions to this delegate.
+Invoke       | void         | *none*                                                                 | [Call](#calling) all subscribed functions of this delegate that have parameters saved on Subscribe() method.
+Remove       | void         | int count = 1, bool fromBack = true                                    | [Remove](#removing) *count* functions from the back (fromBack == true) or front (fromBack == false).
+Clear        | void         | *none*                                                                 | [Removes](#removing) all subscribed functions and parameters from this delegate.
+operator+=   | DelegateBase&| const DelegateType& rhs                                                | [Subscribes](#subscribe) function to this delegate.
+operator+=   | DelegateBase&| const std::initializer_list<DelegateType>& rhs                         | [Subscribes](#subscribe) multiple functions to this delegate.
 operator-=   | DelegateBase&| const DelegateType& rhs                                                | Unsubscribes choosen function from this delegate.
-operator++   | DelegateBase&| *none*                                                                 | Prefix version for duplicating delegate's last subscribed function.
-operator++   | DelegateBase&| int                                                                    | Postfix version for duplication delegate's last subscribed function.
-operator--   | DelegateBase&| *none*                                                                 | Prefix version for removing delegate's last subscribed function.
-operator--   | DelegateBase&| int                                                                    | Postfix version for removing delegate's last subscribed function.
+operator++   | DelegateBase&| *none*                                                                 | Prefix version for [duplicating](#duplicating) delegate's last subscribed function.
+operator++   | DelegateBase&| int                                                                    | Postfix version for [duplicating](#duplicating) delegate's last subscribed function.
+operator--   | DelegateBase&| *none*                                                                 | Prefix version for [removing](#removing) delegate's last subscribed function.
+operator--   | DelegateBase&| int                                                                    | Postfix version for [removing](#removing) delegate's last subscribed function.
 operator==   | const bool   | const DelegateBase& rhs                                                | Compares subscribers of other delegate to subscribers of this delegate.
 operator<    | const bool   | const DelegateBase& rhs                                                | Compares the size of subscribers vector of both delegates.
 operator>    | const bool   | const DelegateBase& rhs                                                | Compares the size of subscribers vector of both delegates.
-operator<<   | DelegateBase&| const DelegateBase& rhs                                                | Transfer all subscribers of other delegate to this delegate. Will clear subscribers from other delegate.
-operator>>   | DelegateBase&| const DelegateBase& rhs                                                | Transfer all subscribers of this delegate to other delegate. Will clear subscribers from this delegate.
+operator<<   | DelegateBase&| const DelegateBase& rhs                                                | [Transfer](#shifting) all subscribers of other delegate to this delegate. Will clear subscribers from other delegate.
+operator>>   | DelegateBase&| const DelegateBase& rhs                                                | [Transfer](#shifting) all subscribers of this delegate to other delegate. Will clear subscribers from this delegate.
   
 ### Delegate
 Main delegate class.
