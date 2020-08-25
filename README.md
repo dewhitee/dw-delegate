@@ -95,9 +95,8 @@ class MemberDelegate
 using namespace dw;
 ```
 ### Initialization
+Initializing delegates:
 ```cpp
-// Initializing delegates:
-
 // Initialization of delegate with void return type and no parameters.
 Delegate del1;
 
@@ -114,18 +113,15 @@ SimpleDelegate<int> del4;
 ```
 
 ### Subscribing
+Subscribing lambda to the delegate without specifying parameters:
 ```cpp
-// Subscribing lambda to the delegate without specifying parameters for later evaluation:
-
 Delegate<int&> del;
 auto lambda = [](int& x) { x++; };
 
 del += lambda;
 ```
-
+Subscribing lambda to the delegate with specified parameters:
 ```cpp
-// Subscribing lambda to the delegate with specified parameters:
-
 Delegate<int&> del;
 auto lambda = [](int& x) { x++; };
 
@@ -134,19 +130,16 @@ int y = 0;
 del.Subscribe(lambda, y);
 // Then Invoke() method will call this lambda function with the 'y' as parameter.
 ```
-
+Subscribe several different functions using initializer list:
 ```cpp
-// Subscribe several different functions using initializer list:
-
 Delegate<int> del;
 
 auto lambda1 = [](int x) { std::cout << "First lambda x = " << x << std::endl; };
 auto lambda2 = [](int x) { std::cout << "Second lambda x = " << x << std::endl; };
 auto lambda3 = [](int x) { std::cout << "Third lambda x = " << x << std::endl; };
 ```
-
+Subscribing with initializer list
 ```cpp
-// Subscribing with initializer list
 del += {lambda1, lambda2, lambda3};
 
 del(4);
@@ -245,7 +238,7 @@ auto lambda = [](int x) { std::cout << "x = " << x << std::endl; };
 del.Subscribe(lambda, {4, 6, 8});
 
 // Duplicating the last subscribed function with the specified integer parameter 8:
-// Note that both  postfix and prefix operators are valid.
+// Note that both postfix and prefix operators are valid.
 del++;
 
 del.Invoke();
