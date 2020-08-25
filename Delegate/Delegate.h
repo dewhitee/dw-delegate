@@ -16,7 +16,7 @@ namespace dw
         template <typename... T>
         struct DelegateParams
         {
-            int index = -1;
+            size_t index = -1;
             std::tuple<T...> parameters;
         };
 
@@ -32,7 +32,7 @@ namespace dw
         std::vector<DelegateType> subscribers;
 
         /**
-         * @brief           Vector of parameters saved when each function is subscribed to this delegate.
+         * @brief           Vector of parameters updated when each function is subscribed to this delegate using Subscribe() method.
          */
         std::vector<DelegateParams<Params...>> parameters;
 
@@ -93,7 +93,6 @@ namespace dw
         {
             for (size_t i = 0; i < parameters.size(); i++)
             {
-                //std::cout << "Index of subscribed function = " << parameters[i].index << std::endl;
                 HelperInvoke(parameters[i].parameters, parameters[i].index,
                              std::index_sequence_for<Params...>());
             }
@@ -460,8 +459,6 @@ namespace dw
 
     /**
      * @brief               Delegate with any return type specified.
-     *  First template argument is return type.
-     *  Second - any number of arguments of any type.
      * 
      * @tparam              ReturnType Return type of the Delegate.
      * @tparam              Params Any number of arguments of any type.
@@ -563,13 +560,20 @@ namespace dw
         }
     };
 
+    /**
+     * @brief  Delegate that holds the subscribed member functions.
+     * @note   
+     * @tparam ReturnType   Return type of the Delegate.
+     * @tparam ObjType      Type of the member function owner class.
+     * @tparam Params       Any number of arguments of any type.
+     */
     template <typename ReturnType, typename ObjType, typename... Params>
     class MemberDelegate
     {
         template <typename... T>
         struct MemberDelegateParams
         {
-            int index = -1;
+            size_t index = -1;
             ObjType *object;
             std::tuple<T...> parameters;
         };
