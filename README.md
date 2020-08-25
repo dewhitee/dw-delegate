@@ -14,20 +14,17 @@
 * [Setup](#setup)
 
 ## General info
-C#-like delegate for C++.
+Small header-only templates library for C#-like delegate.
 
-## API
+# API
 ###### Note: All classes are templates.
-* ***DelegateBase < ReturnType, Params... >***          -   Abstract base (parent) class of (almost) all delegates.
-* ***Delegate < void, Params... >***                    -   Main delegate class.
-* ***RetDelegate < ReturnType, Params... >***           -   Same as ***Delegate***, but can have a custom *ReturnType* specified as template parameter.
-* ***SimpleDelegate < Params... >***                    -   Type of delegate that can't have subscribed functions with saved arguments for lazy evaluation. Is more memory efficient than Delegate or RetDelegate.
-* ***DelegateVisualizer < ReturnType, Params... >***    -   Utility class that can visualize delegate's data.
+### DelegateBase
+Abstract base (parent) class of (almost) all delegates.
 
-### **DelegateBase**
 ```cpp
 template <typename ReturnType, typename... Params>
-class DelegateBase ...
+class DelegateBase
+...
 ```
 
 #### Fields:
@@ -59,8 +56,37 @@ operator>    | const bool   | const DelegateBase& rhs                           
 operator<<   | DelegateBase&| const DelegateBase& rhs                                                | Transfer all subscribers of other delegate to this delegate. Will clear subscribers from other delegate.
 operator>>   | DelegateBase&| const DelegateBase& rhs                                                | Transfer all subscribers of this delegate to other delegate. Will clear subscribers from this delegate.
   
+### Delegate
+Main delegate class.
 
+```cpp
+template <typename... Params>
+class Delegate : public DelegateBase<void, Params...>
+...
+```
+### RetDelegate
+Same as [Delegate](#delegate), but can have a custom *ReturnType* specified as template parameter.
+```cpp
+template <typename ReturnType, typename... Params>
+class RetDelegate : public DelegateBase<ReturnType, Params...>
+...
+```
 
+### SimpleDelegate
+Type of delegate that don't have ability to save parameters through Subscribe() method. Is more memory efficient than Delegate or RetDelegate.
+```cpp
+template <typename... Params>
+class SimpleDelegate
+...
+```
+
+### MemberDelegate
+Delegate that holds the subscribed member functions.
+```cpp
+template <typename ReturnType, typename ObjType, typename... Params>
+class MemberDelegate
+...
+```
 
 ## Examples
 ```cpp
