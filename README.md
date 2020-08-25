@@ -1,7 +1,7 @@
 # dw-delegate
 ## Table of contents
 * [General info](#general-info)
-* [Contains](#contains)
+* [API](#api)
 * [Examples](#examples)
   - [Initialization](#initialization)
   - [Subscribing](#subscribing)
@@ -16,7 +16,7 @@
 ## General info
 C#-like delegate for C++.
 
-#### Contains
+## API
 ###### Note: All classes are templates.
 * ***DelegateBase < ReturnType, Params... >***          -   Abstract base (parent) class of (almost) all delegates.
 * ***Delegate < void, Params... >***                    -   Main delegate class.
@@ -24,7 +24,45 @@ C#-like delegate for C++.
 * ***SimpleDelegate < Params... >***                    -   Type of delegate that can't have subscribed functions with saved arguments for lazy evaluation. Is more memory efficient than Delegate or RetDelegate.
 * ***DelegateVisualizer < ReturnType, Params... >***    -   Utility class that can visualize delegate's data.
 
-### Examples
+### **DelegateBase**
+```cpp
+template <typename ReturnType, typename... Params>
+class DelegateBase ...
+```
+
+#### Fields:
+Field name:  | Type:                                               | Description
+-------------|-----------------------------------------------------|------------
+subscribers  | std::vector<DelegateType>                           | Vector of functions subscribed to this delegate
+parameters   | std::vector<DelegateParams<Params...>>              | Vector of parameters passed with the Subscribe() method.
+
+#### Methods:
+Method name: | Return Type: | Parameters:                                                            | Description
+-------------|--------------|------------------------------------------------------------------------|------------
+Combine      | void         | const DelegateBase& other                                              | Subscribes all functions (subscribers) from other delegate to this delegate
+Subscribe    | void         | const DelegateType& delegate, Params... params                         |
+Subscribe    | void         | const std::initializer_list<DelegateType>& delegates, Params... params |
+Subscribe    | void         | const DelegateType& delegate, std::vector<std::tuple<Params...>> params| 
+Invoke       | void         | *none*                                                                 | Call all subscribed functions of this delegate that have parameters saved on Subscribe() method.
+Remove       | void         | int count = 1, bool fromBack = true                                    | Remove *count* functions from the back (fromBack == true) or front (fromBack == false).
+Clear        | void         | *none*                                                                 | Removes all subscribed functions and parameters from this delegate.
+operator+=   | DelegateBase&| const DelegateType& rhs                                                | Subscribes function to this delegate.
+operator+=   | DelegateBase&| const std::initializer_list<DelegateType>& rhs                         | Subscribes multiple functions to this delegate.
+operator-=   | DelegateBase&| const DelegateType& rhs                                                | Unsubscribes choosen function from this delegate.
+operator++   | DelegateBase&| *none*                                                                 | Prefix version for duplicating delegate's last subscribed function.
+operator++   | DelegateBase&| int                                                                    | Postfix version for duplication delegate's last subscribed function.
+operator--   | DelegateBase&| *none*                                                                 | Prefix version for removing delegate's last subscribed function.
+operator--   | DelegateBase&| int                                                                    | Postfix version for removing delegate's last subscribed function.
+operator==   | const bool   | const DelegateBase& rhs                                                | Compares subscribers of other delegate to subscribers of this delegate.
+operator<    | const bool   | const DelegateBase& rhs                                                | Compares the size of subscribers vector of both delegates.
+operator>    | const bool   | const DelegateBase& rhs                                                | Compares the size of subscribers vector of both delegates.
+operator<<   | DelegateBase&| const DelegateBase& rhs                                                | Transfer all subscribers of other delegate to this delegate. Will clear subscribers from other delegate.
+operator>>   | DelegateBase&| const DelegateBase& rhs                                                | Transfer all subscribers of this delegate to other delegate. Will clear subscribers from this delegate.
+  
+
+
+
+## Examples
 ```cpp
 #include "Delegate\Delegate.h"
 
