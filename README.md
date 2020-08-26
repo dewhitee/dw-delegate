@@ -50,9 +50,9 @@ operator++   | `DelegateBase&`| *none*                                          
 operator++   | `DelegateBase&`| int                                                                    | Postfix version for [duplicating](#duplicating) delegate's last subscribed function.
 operator--   | `DelegateBase&`| *none*                                                                 | Prefix version for [removing](#removing) delegate's last subscribed function.
 operator--   | `DelegateBase&`| int                                                                    | Postfix version for [removing](#removing) delegate's last subscribed function.
-operator==   | `const bool`   | const DelegateBase& rhs                                                | Compares subscribers of other delegate to subscribers of this delegate.
-operator<    | `const bool`   | const DelegateBase& rhs                                                | Compares the size of subscribers vector of both delegates.
-operator>    | `const bool`   | const DelegateBase& rhs                                                | Compares the size of subscribers vector of both delegates.
+operator==   | `bool`         | const DelegateBase& rhs                                                | Compares subscribers of other delegate to subscribers of this delegate.
+operator<    | `bool`         | const DelegateBase& rhs                                                | Compares the size of subscribers vector of both delegates.
+operator>    | `bool`         | const DelegateBase& rhs                                                | Compares the size of subscribers vector of both delegates.
 operator<<   | `DelegateBase&`| const DelegateBase& rhs                                                | [Transfer](#shifting) all subscribers of other delegate to this delegate. Will clear subscribers from other delegate.
 operator>>   | `DelegateBase&`| const DelegateBase& rhs                                                | [Transfer](#shifting) all subscribers of this delegate to other delegate. Will clear subscribers from this delegate.
   
@@ -117,9 +117,9 @@ parameters   | `std::vector<MemberDelegateParams<Params...>>`      | Vector of p
 #### Methods:
 Method name: | Return Type:      | Parameters:                                                            | Description
 -------------|-------------------|------------------------------------------------------------------------|------------
-Subscribe    | `void`            | Params... params                                                       | [Invokes](#calling) all subscribed functions with the specified `params`. 
-Invoke       | `void`            | const DelegateType& rhs                                                | [Subscribes](#subscribing) function to this delegate.
-operator-=   | `SimpleDelegate&` | const DelegateType& rhs                                                | Unsubscribes choosen function from this delegate.
+Subscribe    | `void`            | `ObjType* obj, const MemberDelegateType& delegate, Params...`          | [Subscribes](#subscribing) single member function and saves single parameters pack.
+Invoke       | `void`            | *none*                                                                 | [Subscribes](#subscribing) function to this delegate.
+operator()   | `void`            |                                                                        | [Invokes](#calling) all subscribed functions with the specified `params`.
 
 ## Examples
 ```cpp
@@ -131,7 +131,7 @@ using namespace dw;
 Initializing delegates:
 ```cpp
 // Initialization of delegate with void return type and no parameters.
-Delegate del1;
+Delegate<> del1;
 
 // Initialization of delegate with one parameter returning nothing.
 Delegate<int&> del2;
