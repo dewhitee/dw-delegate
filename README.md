@@ -124,7 +124,7 @@ Method name: | Return Type:      | Parameters:                                  
 -------------|-------------------|------------------------------------------------------------------------|------------
 Subscribe    | `void`            | `ObjType* obj, const MemberDelegateType& method, Params...`            | [Subscribes](#subscribing) single member function and saves single parameters pack.
 Invoke       | `void`            | *none*                                                                 | [Subscribes](#subscribing) method to this delegate.
-operator()   | `void`            |                                                                        | [Invokes](#calling) all subscribed methods with the specified `params`.
+operator()   | `void`            | `ObjType* obj, Params... params`                                       | [Calls](#calling) all subscribed methods with the specified `params` on the `obj`.
 operator+=   | `MemberDelegate&` | `const MemberDelegateType& rhs`                                        | [Subscribe](#subscribing) method to this delegate.
 operator+=   | `MemberDelegate&` | `const std::initializer_list<MemberDelegateType>& rhs`                 | [Subscribe](#subscribing) multiple methods to this delegate.
 operator-=   | `MemberDelegate&` | `const MemberDelegateType& rhs`                                        | [Unsubscribe](#removing) choosen method from this delegate.
