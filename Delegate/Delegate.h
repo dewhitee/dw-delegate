@@ -3,8 +3,6 @@
 #include <vector>
 #include <algorithm>
 #include <tuple>
-#include <any>
-#include <type_traits>
 #include <iostream>
 
 namespace dw
@@ -704,6 +702,12 @@ namespace dw
             return *this;
         }
 
+        /**
+         * @brief           Unsubscribe multiple methods from this delegate.
+         * @note   
+         * @param  rhs:     Methods to unsubscribe from this delegate. 
+         * @retval          Reference to the delegate instance.
+         */
         MemberDelegate &operator-=(const std::initializer_list<MemberDelegateType> &rhs)
         {
             auto toRemove = [&](const MemberDelegateType &delegate) -> bool {
