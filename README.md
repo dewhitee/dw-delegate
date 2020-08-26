@@ -102,7 +102,7 @@ subscribers  | `std::vector<DelegateType>`                         | Vector of f
 #### Methods:
 Method name: | Return Type:      | Parameters:                                                            | Description
 -------------|-------------------|------------------------------------------------------------------------|------------
-operator()   | `ReturnType`      | `Params... params`                                                     | [Invokes](#calling) all subscribed functions with the specified `params`. 
+operator()   | `void`            | `Params... params`                                                     | [Invokes](#calling) all subscribed functions with the specified `params`. 
 operator+=   | `SimpleDelegate&` | `const DelegateType& rhs`                                              | [Subscribes](#subscribing) function to this delegate.
 operator-=   | `SimpleDelegate&` | `const DelegateType& rhs`                                              | [Unsubscribes](#removing) choosen function from this delegate.
 
