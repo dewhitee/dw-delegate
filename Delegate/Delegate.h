@@ -62,26 +62,47 @@ namespace dw
             }
         }
 
-        void Subscribe(const DelegateType &delegate, Params... params)
+        /**
+         * @brief           Subscribes single function and saves single parameters pack.
+         * @note   
+         * @param  function:    Function to subscribe.
+         * @param  params:      Parameters pack for the function to subscribe.
+         * @retval None
+         */
+        void Subscribe(const DelegateType &function, Params... params)
         {
-            this->subscribers.push_back(delegate);
+            this->subscribers.push_back(function);
             AttachParameters(std::tuple<Params...>(params...), std::index_sequence_for<Params...>());
         }
 
-        void Subscribe(const std::initializer_list<DelegateType> &delegates, Params... params)
+        /**
+         * @brief           Subscribes multiple functions and saves single parameters pack.
+         * @note   
+         * @param  functions:   Multiple functions to subscribe.
+         * @param  params:      Parameters pack for the functions to subscribe.
+         * @retval None
+         */
+        void Subscribe(const std::initializer_list<DelegateType> &functions, Params... params)
         {
-            for (auto &&d : delegates)
+            for (auto &&d : functions)
             {
                 this->subscribers.push_back(d);
                 AttachParameters(std::tuple<Params...>(params...), std::index_sequence_for<Params...>());
             }
         }
 
-        void Subscribe(const DelegateType &delegate, std::vector<std::tuple<Params...>> params)
+        /**
+         * @brief           Subscribes single function and save multiple parameters packs.
+         * @note   
+         * @param  function:    Function to subscribe.
+         * @param  params:      Multiple parameter packs for the function to subscribe.
+         * @retval None
+         */
+        void Subscribe(const DelegateType &function, std::vector<std::tuple<Params...>> params)
         {
             for (size_t i = 0; i < params.size(); i++)
             {
-                this->subscribers.push_back(delegate);
+                this->subscribers.push_back(function);
                 AttachParameters(params[i], std::index_sequence_for<Params...>());
             }
         }
@@ -100,10 +121,10 @@ namespace dw
         }
 
         /**
-         * @brief  
+         * @brief           Remove *count* functions from the back or front.
          * @note   
          * @param  count:       Count of functions to remove.
-         * @param  fromBack:    If *true* - removing will be performed from back of the subscribers vector.
+         * @param  fromBack:    If *true* - removing will be performed from back of the subscribers vector. From front otherwise.
          * @retval None
          */
         void Remove(int count = 1, bool fromBack = true)
@@ -191,12 +212,12 @@ namespace dw
             return *this;
         }
 
-        DelegateBase &operator+=(const std::tuple<DelegateType, Params...> &rhs)
-        {
-            this->subscribers.push_back(std::get<0>(rhs));
-            AttachParameters(std::get<1>(rhs));
-            return *this;
-        }
+        // DelegateBase &operator+=(const std::tuple<DelegateType, Params...> &rhs)
+        // {
+        //     this->subscribers.push_back(std::get<0>(rhs));
+        //     AttachParameters(std::get<1>(rhs));
+        //     return *this;
+        // }
 
         DelegateBase &operator+=(const std::initializer_list<DelegateType> &rhs)
         {
@@ -219,10 +240,20 @@ namespace dw
             return *this;
         }
 
-        DelegateBase &operator-=(const std::tuple<DelegateType, Params...> &rhs)
+        // DelegateBase &operator-=(const std::tuple<DelegateType, Params...> &rhs)
+        // {
+        //     subscribers.erase(std::remove(subscribers.begin(), subscribers.end(), std::get<0>(rhs)), subscribers.end());
+        //     AttachParameters(std::get<1>(rhs));
+        //     return *this;
+        // }
+
+        DelegateBase& operator-=(const std::initializer_list<DelegateType> &rhs)
         {
-            subscribers.erase(std::remove(subscribers.begin(), subscribers.end(), std::get<0>(rhs)), subscribers.end());
-            AttachParameters(std::get<1>(rhs));
+            auto toRemove = [&](const DelegateType& delegate) -> bool {
+                return std::find(rhs.begin(), rhs.end(), delegate) != rhs.end();
+            };
+
+            subscribers.erase(std::remove_if(subscribers.begin(), subscribers.end(), toRemove), subscribers.end());
             return *this;
         }
 
@@ -283,67 +314,67 @@ namespace dw
 
         /**
          * @brief           Signature of comparable delegates must match exactly.
-         * @param  &rhs:    Other delegate.
+         * @param  rhs:     Other delegate.
          * @returns         true if count of subscribers of this delegate is less than other's.
          */
-        const bool operator<(const DelegateBase &rhs)
+        bool operator<(const DelegateBase &rhs)
         {
             return subscribers.size() < rhs.subscribers.size();
         }
 
         /**
          * @brief           Signature of comparable delegates must match exactly.
-         * @param  &rhs:    Other delegate.
+         * @param  rhs:     Other delegate.
          * @returns         true if count of subscribers of this delegate is less or equals to other's.
          */
-        const bool operator<=(const DelegateBase &rhs)
+        bool operator<=(const DelegateBase &rhs)
         {
             return subscribers.size() <= rhs.subscribers.size();
         }
 
         /**
          * @brief           Signature of comparable delegates must match exactly.
-         * @param  &rhs:    Other delegate.
+         * @param  rhs:     Other delegate.
          * @returns         true if count of subscribers of this delegate is more than other's.
          */
-        const bool operator>(const DelegateBase &rhs)
+        bool operator>(const DelegateBase &rhs)
         {
             return subscribers.size() > rhs.subscribers.size();
         }
 
         /**
          * @brief           Signature of comparable delegates must match exactly.
-         * @param  &rhs:    Other delegate.
+         * @param  rhs:     Other delegate.
          * @returns         true if count of subscribers of this delegate is more or equals to other's.
          */
-        const bool operator>=(const DelegateBase &rhs)
+        bool operator>=(const DelegateBase &rhs)
         {
             return subscribers.size() >= rhs.subscribers.size();
         }
 
         /**
          * @brief           Signature of comparable delegates must match exactly.
-         * @param  &rhs:    Other delegate.
+         * @param  rhs:     Other delegate.
          * @returns         true if subscribers of this delegate are equal to other's.
          */
-        const bool operator==(const DelegateBase &rhs)
+        bool operator==(const DelegateBase &rhs)
         {
             return subscribers == rhs.subscribers;
         }
 
         /**
          * @brief           Signature of comparable delegates must match exactly.
-         * @param  &rhs:    Other delegate.
+         * @param  rhs:     Other delegate.
          * @returns         true if subscribers of this delegate are not-equal to other's.
          */
-        const bool operator!=(const DelegateBase &rhs)
+        bool operator!=(const DelegateBase &rhs)
         {
             return subscribers != rhs.subscribers;
         }
 
         /**
          * @brief           Transfer all subscribers of other delegate to this delegate. Will clear subscribers from other delegate.
-         * @param  &rhs:    Other delegate.
+         * @param  rhs:     Other delegate.
          * @returns         Pointer to this delegate.
          */
         DelegateBase &operator<<(DelegateBase &rhs)
@@ -358,7 +389,7 @@ namespace dw
 
         /**
          * @brief           Transfer all subscribers of this delegate to other delegate. Will clear subscribers from this delegate.
-         * @param  &rhs:    Other delegate.
+         * @param  rhs:     Other delegate.
          * @returns         Pointer to this delegate.
          */
         DelegateBase &operator>>(DelegateBase &rhs)
@@ -583,22 +614,34 @@ namespace dw
 
     protected:
         /**
-         * @brief           **std::vector** of functions that are subscribed to this delegate.
+         * @brief           **std::vector** of methods that are subscribed to this delegate.
          */
         std::vector<MemberDelegateType> subscribers;
 
         /**
-         * @brief           Vector of parameters saved when each function is subscribed to this delegate.
+         * @brief           Vector of parameters saved when each method is subscribed to this delegate.
          */
         std::vector<MemberDelegateParams<Params...>> parameters;
 
     public:
-        void Subscribe(ObjType *obj, const MemberDelegateType &delegate, Params... params)
+
+        /**
+         * @brief           Subscribe single method for a choosen object with the specified parameters.
+         * @note   
+         * @param  obj:     Pointer to an object that holds the specified method that will be subscribed.
+         * @param  delegate: 
+         * @param  params: 
+         * @retval None
+         */
+        void Subscribe(ObjType *obj, const MemberDelegateType &method, Params... params)
         {
-            this->subscribers.push_back(delegate);
+            this->subscribers.push_back(method);
             AttachParameters(obj, std::tuple<Params...>(params...), std::index_sequence_for<Params...>());
         }
 
+        /**
+         * @brief           Call all subscribed methods of this delegate that have parameters saved on subscription.
+         */
         void Invoke()
         {
             for (size_t i = 0; i < parameters.size(); i++)
@@ -606,6 +649,69 @@ namespace dw
                 HelperMemberInvoke(parameters[i].object, parameters[i].parameters, i, std::index_sequence_for<Params...>());
             }
             return;
+        }
+
+        /**
+         * @brief           Calls subscribed methods with the specified parameters.
+         * @param  obj:     Pointer to an object that will call *all* subscribed methods of this delegate.
+         * @param  params:  Method parameters pack.
+         * @retval None
+         */
+        void operator()(ObjType* obj, Params... params)
+        {
+            for (auto &&i : subscribers)
+            {
+                (obj->*i)(params...);
+            }
+        }
+
+        /**
+         * @brief           Subscribe method to this delegate.
+         * 
+         * @param  rhs:     Method to subscribe.
+         * @returns         Reference to the delegate instance.
+         */
+        MemberDelegate &operator+=(const MemberDelegateType &rhs)
+        {
+            this->subscribers.push_back(rhs);
+            return *this;
+        }
+
+        /**
+         * @brief           Subscribe multiple methods to this delegate.
+         * @note   
+         * @param  rhs:     Methods to subscribe. 
+         * @retval          Reference to the delegate instance.
+         */
+        MemberDelegate &operator+=(const std::initializer_list<MemberDelegateType> &rhs)
+        {
+            for (auto x : rhs)
+            {
+                this->subscribers.push_back(x);
+            }
+            return *this;
+        }
+
+        /**
+         * @brief           Unsubscribe choosen method from this delegate.
+         * 
+         * @param  rhs:     Method to unsubscribe from this delegate.
+         * @returns         Reference to the delegate instance.
+         */
+        MemberDelegate &operator-=(const MemberDelegateType &rhs)
+        {
+            subscribers.erase(std::remove(subscribers.begin(), subscribers.end(), rhs), subscribers.end());
+            return *this;
+        }
+
+        MemberDelegate &operator-=(const std::initializer_list<MemberDelegateType> &rhs)
+        {
+            auto toRemove = [&](const MemberDelegateType &delegate) -> bool {
+                return std::find(rhs.begin(), rhs.end(), delegate) != rhs.end();
+            };
+
+            subscribers.erase(std::remove_if(subscribers.begin(), subscribers.end(), toRemove), subscribers.end());
+            return *this;
         }
 
     private:
