@@ -123,7 +123,7 @@ parameters   | `std::vector<MemberDelegateParams<Params...>>`      | Vector of p
 Method name: | Return Type:      | Parameters:                                                            | Description
 -------------|-------------------|------------------------------------------------------------------------|------------
 Subscribe    | `void`            | `ObjType* obj, const MemberDelegateType& method, Params...`            | [Subscribes](#subscribing) single member function and saves single parameters pack.
-Invoke       | `void`            | *none*                                                                 | [Subscribes](#subscribing) method to this delegate.
+Invoke       | `void`            | *none*                                                                 | [Call](#calling) all subscribed methods of this delegate that have parameters saved on subscription.
 operator()   | `void`            | `ObjType* obj, Params... params`                                       | [Calls](#calling) all subscribed methods with the specified `params` on the `obj`.
 operator+=   | `MemberDelegate&` | `const MemberDelegateType& rhs`                                        | [Subscribe](#subscribing) method to this delegate.
 operator+=   | `MemberDelegate&` | `const std::initializer_list<MemberDelegateType>& rhs`                 | [Subscribe](#subscribing) multiple methods to this delegate.
