@@ -22,7 +22,7 @@
 Small header-only templates library for C#-like delegate.
 
 # API
-###### Note: All classes are templates.
+###### Note: All classes are templates in the `dw` namespace.
 ### DelegateBase
 Abstract base (parent) class of (almost) all delegates.
 
