@@ -4,12 +4,76 @@
 #include <algorithm>
 #include <tuple>
 #include <iostream>
+#include <functional>
 
 namespace dw
 {
+    template <typename ReturnType, typename... Params>
+    class SimpleDelegateBase
+    {
+    protected:
+        /**
+         * @brief           Type defining a pointer to the function with the same arguments as Delegate's
+         */
+        typedef ReturnType (*FunctionType)(Params...);
+        //using FunctionType = std::function<ReturnType(Params...)>;
+
+        /**
+         * @brief           **std::vector** of functions that are subscribed to this delegate.
+         */
+        std::vector<FunctionType> subscribers;
+
+        SimpleDelegateBase() = default;
+    };
+
+    template <typename... Params>
+    class SimpleDelegate : public SimpleDelegateBase<void, Params...>
+    {
+    public:
+        using Parent = SimpleDelegateBase<void, Params...>;
+        using Parent::subscribers;
+        using typename Parent::FunctionType;
+
+        /**
+         * @brief           Invoke all subscribed functions.
+         * 
+         * @param  params:  Arguments of each subscribed function.
+         */
+        void operator()(Params... params)
+        {
+            for (auto &&i : subscribers)
+            {
+                i(params...);
+            }
+        }
+
+        /**
+         * @brief           Subscribe function to this delegate.
+         * 
+         * @param  rhs:     Function to subscribe.
+         * @returns         Reference to the delegate instance.
+         */
+        SimpleDelegate &operator+=(const FunctionType &rhs)
+        {
+            this->subscribers.push_back(rhs);
+            return *this;
+        }
+
+        /**
+         * @brief           Unsubscribe choosen function from this delegate.
+         * 
+         * @param  rhs:     Function to unsubscribe from this delegate.
+         * @returns         Reference to the delegate instance.
+         */
+        SimpleDelegate &operator-=(const FunctionType &rhs)
+        {
+            subscribers.erase(std::remove(subscribers.begin(), subscribers.end(), rhs), subscribers.end());
+            return *this;
+        }
+    };
 
     template <typename ReturnType, typename... Params>
-    class DelegateBase
+    class DelegateBase : public SimpleDelegateBase<ReturnType, Params...>
     {
         template <typename... T>
         struct DelegateParams
@@ -19,15 +83,9 @@ namespace dw
         };
 
     protected:
-        /**
-         * @brief           Type defining a pointer to the function with the same arguments as Delegate's
-         */
-        typedef ReturnType (*DelegateType)(Params...);
-
-        /**
-         * @brief           **std::vector** of functions that are subscribed to this delegate.
-         */
-        std::vector<DelegateType> subscribers;
+        using Parent = SimpleDelegateBase<ReturnType, Params...>;
+        using Parent::subscribers;
+        using typename Parent::FunctionType;
 
         /**
          * @brief           Vector of parameters updated when each function is subscribed to this delegate using Subscribe() method.
@@ -35,7 +93,7 @@ namespace dw
         std::vector<DelegateParams<Params...>> parameters;
 
     public:
-        const std::vector<DelegateType> &GetSubscribers() const { return this->subscribers; }
+        const std::vector<FunctionType> &GetSubscribers() const { return this->subscribers; }
 
         /**
          * @brief           Subscribe all functions (subscribers) from other delegate to this delegate.
@@ -58,7 +116,7 @@ namespace dw
          * @param  params:      Parameters pack for the function to subscribe.
          * @retval None
          */
-        void Subscribe(const DelegateType &function, Params... params)
+        void Subscribe(const FunctionType &function, Params... params)
         {
             this->subscribers.push_back(function);
             AttachParameters(std::tuple<Params...>(params...), std::index_sequence_for<Params...>());
@@ -71,7 +129,7 @@ namespace dw
          * @param  params:      Parameters pack for the functions to subscribe.
          * @retval None
          */
-        void Subscribe(const std::initializer_list<DelegateType> &functions, Params... params)
+        void Subscribe(const std::initializer_list<FunctionType> &functions, Params... params)
         {
             for (auto &&d : functions)
             {
@@ -87,7 +145,7 @@ namespace dw
          * @param  params:      Multiple parameter packs for the function to subscribe.
          * @retval None
          */
-        void Subscribe(const DelegateType &function, std::vector<std::tuple<Params...>> params)
+        void Subscribe(const FunctionType &function, std::vector<std::tuple<Params...>> params)
         {
             for (size_t i = 0; i < params.size(); i++)
             {
@@ -146,14 +204,14 @@ namespace dw
          * @note   
          * @param  subscriber: 
          */
-        void Remove(const DelegateType &subscriber)
+        void Remove(const FunctionType &subscriber)
         {
             std::cout << "Removing " << &subscriber << std::endl;
             subscribers.erase(
                 std::remove_if(
                     subscribers.begin(),
                     subscribers.end(),
-                    [subscriber](const DelegateType &x) { return &x == &subscriber; }),
+                    [subscriber](const FunctionType &x) { return &x == &subscriber; }),
                 subscribers.end());
             for (auto i : subscribers)
             {
@@ -166,7 +224,7 @@ namespace dw
          * @note            Is not implemented yet.
          * @param  subscribers: *std*::vector of functions that must be removed from the delegate.
          */
-        void Remove(const std::vector<DelegateType> &subscribers)
+        void Remove(const std::vector<FunctionType> &subscribers)
         {
             for (auto &s : subscribers)
             {
@@ -174,7 +232,7 @@ namespace dw
                     std::remove_if(
                         this->subscribers.begin(),
                         this->subscribers.end(),
-                        [s](const DelegateType &x) { return &s == &x; }),
+                        [s](const FunctionType &x) { return &s == &x; }),
                     this->subscribers.end());
             }
         }
@@ -195,13 +253,13 @@ namespace dw
          * @param  rhs:     Function to subscribe.
          * @returns         Reference to the delegate instance.
          */
-        DelegateBase &operator+=(const DelegateType &rhs)
+        DelegateBase &operator+=(const FunctionType &rhs)
         {
             this->subscribers.push_back(rhs);
             return *this;
         }
 
-        DelegateBase &operator+=(const std::initializer_list<DelegateType> &rhs)
+        DelegateBase &operator+=(const std::initializer_list<FunctionType> &rhs)
         {
             for (auto x : rhs)
             {
@@ -216,16 +274,16 @@ namespace dw
          * @param  rhs:     Function to unsubscribe from this delegate.
          * @returns         Reference to the delegate instance.
          */
-        DelegateBase &operator-=(const DelegateType &rhs)
+        DelegateBase &operator-=(const FunctionType &rhs)
         {
             subscribers.erase(std::remove(subscribers.begin(), subscribers.end(), rhs), subscribers.end());
             return *this;
         }
 
-        DelegateBase& operator-=(const std::initializer_list<DelegateType> &rhs)
+        DelegateBase &operator-=(const std::initializer_list<FunctionType> &rhs)
         {
-            auto toRemove = [&](const DelegateType& delegate) -> bool {
-                return std::find(rhs.begin(), rhs.end(), delegate) != rhs.end();
+            auto toRemove = [&](const FunctionType &func) -> bool {
+                return std::find(rhs.begin(), rhs.end(), func) != rhs.end();
             };
 
             subscribers.erase(std::remove_if(subscribers.begin(), subscribers.end(), toRemove), subscribers.end());
@@ -239,7 +297,7 @@ namespace dw
                 return *this;
             }
 
-            DelegateType newDel = subscribers.front();
+            FunctionType newDel = subscribers.front();
 
             if (parameters.empty())
             {
@@ -260,7 +318,7 @@ namespace dw
                 return *this;
             }
 
-            DelegateType newDel = subscribers.back();
+            FunctionType newDel = subscribers.back();
 
             if (parameters.empty())
             {
@@ -296,9 +354,22 @@ namespace dw
 
         DelegateBase &operator--(int)
         {
-            DelegateBase tmp(*this);
-            operator--();
-            return tmp;
+            if (subscribers.empty())
+            {
+                return *this;
+            }
+
+            if (parameters.empty())
+            {
+                subscribers.pop_back();
+                return *this;
+            }
+
+            int index = parameters.back().index;
+            parameters.pop_back();
+            subscribers.erase(subscribers.begin() + index);
+
+            return *this;
         }
 
         /**
@@ -461,7 +532,7 @@ namespace dw
         using Parent::Clear;
         using Parent::Invoke;
         using Parent::subscribers;
-        using typename Parent::DelegateType;
+        using typename Parent::FunctionType;
 
         /**
          * @brief           Invoke all subscribed functions.
@@ -494,7 +565,7 @@ namespace dw
         using Parent::HelperInvoke;
         using Parent::parameters;
         using Parent::subscribers;
-        using typename Parent::DelegateType;
+        using typename Parent::FunctionType;
 
         /**
          * @brief           Call all subscribed functions of this delegate that have parameters saved on subscription.
@@ -528,58 +599,6 @@ namespace dw
         }
     };
 
-    template <typename... Params>
-    class SimpleDelegate
-    {
-        /**
-         * @brief           Type defining a pointer to the function with the same arguments as Delegate's
-         */
-        typedef void (*DelegateType)(Params...);
-
-        /**
-         * @brief           **std::vector** of functions that are subscribed to this delegate.
-         */
-        std::vector<DelegateType> subscribers;
-
-    public:
-        /**
-         * @brief           Invoke all subscribed functions.
-         * 
-         * @param  params:  Arguments of each subscribed function.
-         */
-        void operator()(Params... params)
-        {
-            for (auto &&i : subscribers)
-            {
-                i(params...);
-            }
-        }
-
-        /**
-         * @brief           Subscribe function to this delegate.
-         * 
-         * @param  rhs:     Function to subscribe.
-         * @returns         Reference to the delegate instance.
-         */
-        SimpleDelegate &operator+=(const DelegateType &rhs)
-        {
-            this->subscribers.push_back(rhs);
-            return *this;
-        }
-
-        /**
-         * @brief           Unsubscribe choosen function from this delegate.
-         * 
-         * @param  rhs:     Function to unsubscribe from this delegate.
-         * @returns         Reference to the delegate instance.
-         */
-        SimpleDelegate &operator-=(const DelegateType &rhs)
-        {
-            subscribers.erase(std::remove(subscribers.begin(), subscribers.end(), rhs), subscribers.end());
-            return *this;
-        }
-    };
-
     /**
      * @brief  Delegate that holds the subscribed member functions.
      * @note   
@@ -587,7 +606,7 @@ namespace dw
      * @tparam ObjType      Type of the member function owner class.
      * @tparam Params       Any number of arguments of any type.
      */
-    template <typename ReturnType, typename ObjType, typename... Params>
+    template <typename ReturnType, class ObjType, typename... Params>
     class MemberDelegateBase
     {
         template <typename... T>
@@ -611,6 +630,8 @@ namespace dw
          * @brief           Vector of parameters saved when each method is subscribed to this delegate.
          */
         std::vector<MemberDelegateParams<Params...>> parameters;
+
+        MemberDelegateBase() = default;
 
     public:
 
@@ -701,7 +722,7 @@ namespace dw
         }
     };
 
-    template <typename ObjType, typename... Params>
+    template <class ObjType, typename... Params>
     class MemberDelegate : public MemberDelegateBase<void, ObjType, Params...>
     {
     public:
@@ -744,7 +765,7 @@ namespace dw
         }
     };
 
-    template <typename ReturnType, typename ObjType, typename... Params>
+    template <typename ReturnType, class ObjType, typename... Params>
     class RetMemberDelegate : public MemberDelegateBase<ReturnType, ObjType, Params...>
     {
         static_assert(!std::is_void<ReturnType>::value, "RetMemberDelegate can't have void return type!");
