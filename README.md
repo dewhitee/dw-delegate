@@ -2,11 +2,14 @@
 ## Table of contents
 * [General info](#general-info)
 * [API](#api)
+  - [SimpleDelegateBase](#simpledelegatebase)
   - [DelegateBase](#delegatebase)
   - [Delegate](#delegate)
   - [RetDelegate](#retdelegate)
   - [SimpleDelegate](#simpledelegate)
+  - [MemberDelegateBase](#memberdelegatebase)
   - [MemberDelegate](#memberdelegate)
+  - [RetMemberDelegate](#retmemberdelegate)
 * [Examples](#examples)
   - [Initialization](#initialization)
   - [Subscribing](#subscribing)
@@ -23,34 +26,47 @@ Small header-only templates library for C#-like delegate.
 
 # API
 ###### Note: All classes are templates in the `dw` namespace.
-### DelegateBase
-Abstract base (parent) class of (almost) all delegates.
+
+### SimpleDelegateBase
+The base (parent) class of [DelegateBase](#delegatebase) and [SimpleDelegate](#simpledelegate). Contains only the FunctionType and the vector of subscribers. Might be removed in the future in favour of [DelegateBase](#delegatebase).
 
 ```cpp
 template <typename ReturnType, typename... Params>
-class DelegateBase
+class SimpleDelegateBase
+...
+```
+#### Fields:
+Field name:  | Type:                                               | Description
+-------------|-----------------------------------------------------|------------
+subscribers  | `std::vector<FunctionType>`                         | Vector of functions [subscribed](#subscribing) to this delegate
+
+### DelegateBase
+Abstract base (parent) class of [Delegate](#delegate) and [RetDelegate](#retdelegate). Might be refactor to be the base class of all delegates later.
+
+```cpp
+template <typename ReturnType, typename... Params>
+class DelegateBase : public SimpleDelegateBase<ReturnType, Params...>
 ...
 ```
 
 #### Fields:
 Field name:  | Type:                                               | Description
 -------------|-----------------------------------------------------|------------
-subscribers  | `std::vector<DelegateType>`                         | Vector of functions [subscribed](#subscribing) to this delegate
-parameters   | `std::vector<DelegateParams<Params...>>`            | Vector of parameters passed with the Subscribe() method.
+parameters   | `std::vector<FunctionParams<Params...>>`            | Vector of parameters passed with the Subscribe() method.
 
 #### Methods:
 Method name: | Return Type:   | Parameters:                                                              | Description
 -------------|----------------|--------------------------------------------------------------------------|------------
 Combine      | `void`         | `const DelegateBase& other`                                              | [Subscribes](#subscribing) all functions (subscribers) from other delegate to this delegate
-Subscribe    | `void`         | `const DelegateType& function, Params... params`                         | [Subscribes](#subscribing) single function and saves single parameters pack.
-Subscribe    | `void`         | `const std::initializer_list<DelegateType>& functions, Params... params` | [Subscribes](#subscribing) multiple functions and saves single parameters pack.
-Subscribe    | `void`         | `const DelegateType& function, std::vector<std::tuple<Params...>> params`| [Subscribes](#subscribing) single function and saves multiple parameters packs.
+Subscribe    | `void`         | `const FunctionType& function, Params... params`                         | [Subscribes](#subscribing) single function and saves single parameters pack.
+Subscribe    | `void`         | `const std::initializer_list<FunctionType>& functions, Params... params` | [Subscribes](#subscribing) multiple functions and saves single parameters pack.
+Subscribe    | `void`         | `const FunctionType& function, std::vector<std::tuple<Params...>> params`| [Subscribes](#subscribing) single function and saves multiple parameters packs.
 Invoke       | `void`         | *none*                                                                   | [Call](#calling) all subscribed functions of this delegate that have parameters saved on Subscribe() method.
 Remove       | `void`         | `int count = 1, bool fromBack = true`                                    | [Remove](#removing) *count* functions from the back (fromBack == true) or front (fromBack == false).
 Clear        | `void`         | *none*                                                                   | [Removes](#removing) all subscribed functions and parameters from this delegate.
-operator+=   | `DelegateBase&`| `const DelegateType& rhs`                                                | [Subscribes](#subscribe) function to this delegate.
-operator+=   | `DelegateBase&`| `const std::initializer_list<DelegateType>& rhs`                         | [Subscribes](#subscribe) multiple functions to this delegate.
-operator-=   | `DelegateBase&`| `const DelegateType& rhs`                                                | [Unsubscribes](#removing) choosen function from this delegate.
+operator+=   | `DelegateBase&`| `const FunctionType& rhs`                                                | [Subscribes](#subscribe) function to this delegate.
+operator+=   | `DelegateBase&`| `const std::initializer_list<FunctionType>& rhs`                         | [Subscribes](#subscribe) multiple functions to this delegate.
+operator-=   | `DelegateBase&`| `const FunctionType& rhs`                                                | [Unsubscribes](#removing) choosen function from this delegate.
 operator++   | `DelegateBase&`| *none*                                                                   | Prefix version for [duplicating](#duplicating) delegate's last subscribed function.
 operator++   | `DelegateBase&`| `int`                                                                    | Postfix version for [duplicating](#duplicating) delegate's last subscribed function.
 operator--   | `DelegateBase&`| *none*                                                                   | Prefix version for [removing](#removing) delegate's last subscribed function.
@@ -91,44 +107,64 @@ operator()   | `ReturnType` | `Params... params`                                
 Type of delegate that don't have ability to save parameters through Subscribe() method. Is more memory efficient than [Delegate](#delegate) or [RetDelegate](#retdelegate).
 ```cpp
 template <typename... Params>
-class SimpleDelegate
+class SimpleDelegate : public SimpleDelegateBase<void, Params...>
 ...
 ```
-#### Fields:
-Field name:  | Type:                                               | Description
--------------|-----------------------------------------------------|------------
-subscribers  | `std::vector<DelegateType>`                         | Vector of functions subscribed to this delegate
-
 #### Methods:
 Method name: | Return Type:      | Parameters:                                                            | Description
 -------------|-------------------|------------------------------------------------------------------------|------------
 operator()   | `void`            | `Params... params`                                                     | [Invokes](#calling) all subscribed functions with the specified `params`. 
-operator+=   | `SimpleDelegate&` | `const DelegateType& rhs`                                              | [Subscribes](#subscribing) function to this delegate.
-operator-=   | `SimpleDelegate&` | `const DelegateType& rhs`                                              | [Unsubscribes](#removing) choosen function from this delegate.
+operator+=   | `SimpleDelegate&` | `const FunctionType& rhs`                                              | [Subscribes](#subscribing) function to this delegate.
+operator-=   | `SimpleDelegate&` | `const FunctionType& rhs`                                              | [Unsubscribes](#removing) choosen function from this delegate.
 
-### MemberDelegate
-Delegate that holds the subscribed member functions.
+### MemberDelegateBase
+Base class of Delegate that holds the subscribed member functions.
 ```cpp
-template <typename ReturnType, typename ObjType, typename... Params>
-class MemberDelegate
+template <typename ReturnType, class ObjType, typename... Params>
+class MemberDelegateBase
 ...
 ```
 #### Fields:
 Field name:  | Type:                                               | Description
 -------------|-----------------------------------------------------|------------
-subscribers  | `std::vector<MemberDelegateType>`                   | Vector of methods subscribed to this delegate
-parameters   | `std::vector<MemberDelegateParams<Params...>>`      | Vector of parameters passed with the Subscribe() method. 
+subscribers  | `std::vector<MemberFunctionType>`                   | Vector of methods subscribed to this delegate
+parameters   | `std::vector<MemberFunctionParams<Params...>>`      | Vector of parameters passed with the Subscribe() method. 
 
 #### Methods:
 Method name: | Return Type:      | Parameters:                                                            | Description
 -------------|-------------------|------------------------------------------------------------------------|------------
-Subscribe    | `void`            | `ObjType* obj, const MemberDelegateType& method, Params...`            | [Subscribes](#subscribing) single member function and saves single parameters pack.
+Subscribe    | `void`            | `ObjType* obj, const MemberFunctionType& method, Params...`            | [Subscribes](#subscribing) single member function and saves single parameters pack.
+Clear        | `void`            | *none*                                                                 | Clears all methods and parameters of this delegate.
+operator+=   | `MemberDelegate&` | `const MemberFunctionType& rhs`                                        | [Subscribe](#subscribing) method to this delegate.
+operator+=   | `MemberDelegate&` | `const std::initializer_list<MemberFunctionType>& rhs`                 | [Subscribe](#subscribing) multiple methods to this delegate.
+operator-=   | `MemberDelegate&` | `const MemberFunctionType& rhs`                                        | [Unsubscribe](#removing) choosen method from this delegate.
+operator-=   | `MemberDelegate&` | `const std::initializer_list<MemberFunctionType>& rhs`                 | [Unsubscribe](#removing) multiple methods from this delegate.
+
+### MemberDelegate
+Delegate that holds the member functions with void return type.
+```cpp
+template <class ObjType, typename... Params>
+class MemberDelegate : public MemberDelegateBase<void, ObjType, Params...>
+...
+```
+#### Methods:
+Method name: | Return Type:      | Parameters:                                                            | Description
+-------------|-------------------|------------------------------------------------------------------------|------------
 Invoke       | `void`            | *none*                                                                 | [Call](#calling) all subscribed methods of this delegate that have parameters saved on subscription.
 operator()   | `void`            | `ObjType* obj, Params... params`                                       | [Calls](#calling) all subscribed methods with the specified `params` on the `obj`.
-operator+=   | `MemberDelegate&` | `const MemberDelegateType& rhs`                                        | [Subscribe](#subscribing) method to this delegate.
-operator+=   | `MemberDelegate&` | `const std::initializer_list<MemberDelegateType>& rhs`                 | [Subscribe](#subscribing) multiple methods to this delegate.
-operator-=   | `MemberDelegate&` | `const MemberDelegateType& rhs`                                        | [Unsubscribe](#removing) choosen method from this delegate.
-operator-=   | `MemberDelegate&` | `const std::initializer_list<MemberDelegateType>& rhs`                 | [Unsubscribe](#removing) multiple methods from this delegate.
+
+### RetMemberDelegate
+Delegate that holds the member functions with any specified return type (but not void).
+```cpp
+template <typename ReturnType, class ObjType, typename... Params>
+class RetMemberDelegate : public MemberDelegateBase<ReturnType, ObjType, Params...>
+...
+```
+#### Methods:
+Method name: | Return Type:      | Parameters:                                                            | Description
+-------------|-------------------|------------------------------------------------------------------------|------------
+Invoke       | `ReturnType`      | *none*                                                                 | [Call](#calling) all subscribed methods of this delegate that have parameters saved on subscription. Returns the sum of all called functions results.
+operator()   | `ReturnType`      | `ObjType* obj, Params... params`                                       | [Calls](#calling) all subscribed methods with the specified `params` on the `obj`. Returns the sum of all called functions results.
 
 ## Examples
 ```cpp
