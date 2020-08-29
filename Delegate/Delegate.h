@@ -51,15 +51,6 @@ namespace dw
             }
         }
 
-        void Combine(const std::tuple<const DelegateBase &, Params...> &other)
-        {
-            for (size_t i = 0; i < std::get<0>(other).subscribers.size(); i++)
-            {
-                this->subscribers.push_back(std::get<0>(other).subscribers[i]);
-                AttachParameters(std::get<1>(other));
-            }
-        }
-
         /**
          * @brief           Subscribes single function and saves single parameters pack.
          * @note   
@@ -210,13 +201,6 @@ namespace dw
             return *this;
         }
 
-        // DelegateBase &operator+=(const std::tuple<DelegateType, Params...> &rhs)
-        // {
-        //     this->subscribers.push_back(std::get<0>(rhs));
-        //     AttachParameters(std::get<1>(rhs));
-        //     return *this;
-        // }
-
         DelegateBase &operator+=(const std::initializer_list<DelegateType> &rhs)
         {
             for (auto x : rhs)
@@ -238,13 +222,6 @@ namespace dw
             return *this;
         }
 
-        // DelegateBase &operator-=(const std::tuple<DelegateType, Params...> &rhs)
-        // {
-        //     subscribers.erase(std::remove(subscribers.begin(), subscribers.end(), std::get<0>(rhs)), subscribers.end());
-        //     AttachParameters(std::get<1>(rhs));
-        //     return *this;
-        // }
-
         DelegateBase& operator-=(const std::initializer_list<DelegateType> &rhs)
         {
             auto toRemove = [&](const DelegateType& delegate) -> bool {
@@ -256,6 +233,27 @@ namespace dw
         }
 
         DelegateBase &operator++()
+        {
+            if (subscribers.empty())
+            {
+                return *this;
+            }
+
+            DelegateType newDel = subscribers.front();
+
+            if (parameters.empty())
+            {
+                subscribers.insert(subscribers.begin(), newDel);
+                return *this;
+            }
+
+            subscribers.insert(subscribers.begin(), newDel);
+            AttachParameters(parameters.front().parameters, std::index_sequence_for<Params...>());
+
+            return *this;
+        }
+
+        DelegateBase &operator++(int)
         {
             if (subscribers.empty())
             {
@@ -274,13 +272,6 @@ namespace dw
             AttachParameters(parameters.back().parameters, std::index_sequence_for<Params...>());
 
             return *this;
-        }
-
-        DelegateBase &operator++(int)
-        {
-            DelegateBase tmp(*this);
-            operator++();
-            return tmp;
         }
 
         DelegateBase &operator--()
@@ -597,7 +588,7 @@ namespace dw
      * @tparam Params       Any number of arguments of any type.
      */
     template <typename ReturnType, typename ObjType, typename... Params>
-    class MemberDelegate
+    class MemberDelegateBase
     {
         template <typename... T>
         struct MemberDelegateParams
@@ -633,9 +624,91 @@ namespace dw
          */
         void Subscribe(ObjType *obj, const MemberDelegateType &method, Params... params)
         {
-            this->subscribers.push_back(method);
+            subscribers.push_back(method);
             AttachParameters(obj, std::tuple<Params...>(params...), std::index_sequence_for<Params...>());
         }
+
+        void Clear()
+        {
+            subscribers->clear();
+            parameters->clear();
+        }
+
+        /**
+         * @brief           Subscribe method to this delegate.
+         * 
+         * @param  rhs:     Method to subscribe.
+         * @returns         Reference to the delegate instance.
+         */
+        MemberDelegateBase &operator+=(const MemberDelegateType &rhs)
+        {
+            subscribers.push_back(rhs);
+            return *this;
+        }
+
+        /**
+         * @brief           Subscribe multiple methods to this delegate.
+         * @note   
+         * @param  rhs:     Methods to subscribe. 
+         * @retval          Reference to the delegate instance.
+         */
+        MemberDelegateBase &operator+=(const std::initializer_list<MemberDelegateType> &rhs)
+        {
+            for (auto x : rhs)
+            {
+                this->subscribers.push_back(x);
+            }
+            return *this;
+        }
+
+        /**
+         * @brief           Unsubscribe choosen method from this delegate.
+         * 
+         * @param  rhs:     Method to unsubscribe from this delegate.
+         * @returns         Reference to the delegate instance.
+         */
+        MemberDelegateBase &operator-=(const MemberDelegateType &rhs)
+        {
+            subscribers.erase(std::remove(subscribers.begin(), subscribers.end(), rhs), subscribers.end());
+            return *this;
+        }
+
+        /**
+         * @brief           Unsubscribe multiple methods from this delegate.
+         * @note   
+         * @param  rhs:     Methods to unsubscribe from this delegate. 
+         * @retval          Reference to the delegate instance.
+         */
+        MemberDelegateBase &operator-=(const std::initializer_list<MemberDelegateType> &rhs)
+        {
+            auto toRemove = [&](const MemberDelegateType &delegate) -> bool {
+                return std::find(rhs.begin(), rhs.end(), delegate) != rhs.end();
+            };
+
+            subscribers.erase(std::remove_if(subscribers.begin(), subscribers.end(), toRemove), subscribers.end());
+            return *this;
+        }
+
+    private:
+        void AttachParameters(ObjType *obj, Params... params)
+        {
+            this->parameters.push_back(MemberDelegateParams<Params...>{subscribers.size() - 1, obj, params...});
+        }
+        template <size_t... Indices>
+        void AttachParameters(ObjType *obj, const std::tuple<Params...> &tuple, std::index_sequence<Indices...>)
+        {
+            this->parameters.push_back(MemberDelegateParams<Params...>{subscribers.size() - 1, obj, tuple});
+        }
+    };
+
+    template <typename ObjType, typename... Params>
+    class MemberDelegate : public MemberDelegateBase<void, ObjType, Params...>
+    {
+    public:
+        using Parent = MemberDelegateBase<void, ObjType, Params...>;
+        using Parent::parameters;
+        using Parent::subscribers;
+        using typename Parent::MemberDelegateType;
 
         /**
          * @brief           Call all subscribed methods of this delegate that have parameters saved on subscription.
@@ -655,67 +728,12 @@ namespace dw
          * @param  params:  Method parameters pack.
          * @retval None
          */
-        void operator()(ObjType* obj, Params... params)
+        void operator()(ObjType *obj, Params... params)
         {
             for (auto &&i : subscribers)
             {
                 (obj->*i)(params...);
             }
-        }
-
-        /**
-         * @brief           Subscribe method to this delegate.
-         * 
-         * @param  rhs:     Method to subscribe.
-         * @returns         Reference to the delegate instance.
-         */
-        MemberDelegate &operator+=(const MemberDelegateType &rhs)
-        {
-            this->subscribers.push_back(rhs);
-            return *this;
-        }
-
-        /**
-         * @brief           Subscribe multiple methods to this delegate.
-         * @note   
-         * @param  rhs:     Methods to subscribe. 
-         * @retval          Reference to the delegate instance.
-         */
-        MemberDelegate &operator+=(const std::initializer_list<MemberDelegateType> &rhs)
-        {
-            for (auto x : rhs)
-            {
-                this->subscribers.push_back(x);
-            }
-            return *this;
-        }
-
-        /**
-         * @brief           Unsubscribe choosen method from this delegate.
-         * 
-         * @param  rhs:     Method to unsubscribe from this delegate.
-         * @returns         Reference to the delegate instance.
-         */
-        MemberDelegate &operator-=(const MemberDelegateType &rhs)
-        {
-            subscribers.erase(std::remove(subscribers.begin(), subscribers.end(), rhs), subscribers.end());
-            return *this;
-        }
-
-        /**
-         * @brief           Unsubscribe multiple methods from this delegate.
-         * @note   
-         * @param  rhs:     Methods to unsubscribe from this delegate. 
-         * @retval          Reference to the delegate instance.
-         */
-        MemberDelegate &operator-=(const std::initializer_list<MemberDelegateType> &rhs)
-        {
-            auto toRemove = [&](const MemberDelegateType &delegate) -> bool {
-                return std::find(rhs.begin(), rhs.end(), delegate) != rhs.end();
-            };
-
-            subscribers.erase(std::remove_if(subscribers.begin(), subscribers.end(), toRemove), subscribers.end());
-            return *this;
         }
 
     private:
@@ -724,14 +742,53 @@ namespace dw
         {
             (obj->*subscribers[index])(std::get<Indices>(tuple)...);
         }
-        void AttachParameters(ObjType *obj, Params... params)
+    };
+
+    template <typename ReturnType, typename ObjType, typename... Params>
+    class RetMemberDelegate : public MemberDelegateBase<ReturnType, ObjType, Params...>
+    {
+        static_assert(!std::is_void<ReturnType>::value, "RetMemberDelegate can't have void return type!");
+
+    public:
+        using Parent = MemberDelegateBase<ReturnType, ObjType, Params...>;
+        using Parent::parameters;
+        using Parent::subscribers;
+        using typename Parent::MemberDelegateType;
+
+        /**
+         * @brief           Call all subscribed methods of this delegate that have parameters saved on subscription.
+         */
+        ReturnType Invoke()
         {
-            this->parameters.push_back(MemberDelegateParams<Params...>{subscribers.size() - 1, obj, params...});
+            ReturnType result = ReturnType();
+            for (size_t i = 0; i < parameters.size(); i++)
+            {
+                result += HelperMemberInvoke(parameters[i].object, parameters[i].parameters, i, std::index_sequence_for<Params...>());
+            }
+            return result;
         }
-        template <size_t... Indices>
-        void AttachParameters(ObjType *obj, const std::tuple<Params...> &tuple, std::index_sequence<Indices...>)
+
+        /**
+         * @brief           Calls subscribed methods with the specified parameters.
+         * @param  obj:     Pointer to an object that will call *all* subscribed methods of this delegate.
+         * @param  params:  Method parameters pack.
+         * @retval None
+         */
+        ReturnType operator()(ObjType *obj, Params... params)
         {
-            this->parameters.push_back(MemberDelegateParams<Params...>{subscribers.size() - 1, obj, tuple});
+            ReturnType result = ReturnType();
+            for (auto &&i : subscribers)
+            {
+                result += (obj->*i)(params...);
+            }
+            return result;
+        }
+
+    private:
+        template <size_t... Indices>
+        ReturnType HelperMemberInvoke(ObjType *obj, const std::tuple<Params...> &tuple, int index, std::index_sequence<Indices...>)
+        {
+            return (obj->*subscribers[index])(std::get<Indices>(tuple)...);
         }
     };
 
