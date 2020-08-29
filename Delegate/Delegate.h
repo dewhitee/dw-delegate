@@ -618,13 +618,13 @@ namespace dw
         };
 
     public:
-        typedef ReturnType (ObjType::*MemberDelegateType)(Params...);
+        typedef ReturnType (ObjType::*MemberFunctionType)(Params...);
 
     protected:
         /**
          * @brief           **std::vector** of methods that are subscribed to this delegate.
          */
-        std::vector<MemberDelegateType> subscribers;
+        std::vector<MemberFunctionType> subscribers;
 
         /**
          * @brief           Vector of parameters saved when each method is subscribed to this delegate.
@@ -643,7 +643,7 @@ namespace dw
          * @param  params: 
          * @retval None
          */
-        void Subscribe(ObjType *obj, const MemberDelegateType &method, Params... params)
+        void Subscribe(ObjType *obj, const MemberFunctionType &method, Params... params)
         {
             subscribers.push_back(method);
             AttachParameters(obj, std::tuple<Params...>(params...), std::index_sequence_for<Params...>());
@@ -661,7 +661,7 @@ namespace dw
          * @param  rhs:     Method to subscribe.
          * @returns         Reference to the delegate instance.
          */
-        MemberDelegateBase &operator+=(const MemberDelegateType &rhs)
+        MemberDelegateBase &operator+=(const MemberFunctionType &rhs)
         {
             subscribers.push_back(rhs);
             return *this;
@@ -673,7 +673,7 @@ namespace dw
          * @param  rhs:     Methods to subscribe. 
          * @retval          Reference to the delegate instance.
          */
-        MemberDelegateBase &operator+=(const std::initializer_list<MemberDelegateType> &rhs)
+        MemberDelegateBase &operator+=(const std::initializer_list<MemberFunctionType> &rhs)
         {
             for (auto x : rhs)
             {
@@ -688,7 +688,7 @@ namespace dw
          * @param  rhs:     Method to unsubscribe from this delegate.
          * @returns         Reference to the delegate instance.
          */
-        MemberDelegateBase &operator-=(const MemberDelegateType &rhs)
+        MemberDelegateBase &operator-=(const MemberFunctionType &rhs)
         {
             subscribers.erase(std::remove(subscribers.begin(), subscribers.end(), rhs), subscribers.end());
             return *this;
@@ -700,9 +700,9 @@ namespace dw
          * @param  rhs:     Methods to unsubscribe from this delegate. 
          * @retval          Reference to the delegate instance.
          */
-        MemberDelegateBase &operator-=(const std::initializer_list<MemberDelegateType> &rhs)
+        MemberDelegateBase &operator-=(const std::initializer_list<MemberFunctionType> &rhs)
         {
-            auto toRemove = [&](const MemberDelegateType &delegate) -> bool {
+            auto toRemove = [&](const MemberFunctionType &delegate) -> bool {
                 return std::find(rhs.begin(), rhs.end(), delegate) != rhs.end();
             };
 
@@ -729,7 +729,7 @@ namespace dw
         using Parent = MemberDelegateBase<void, ObjType, Params...>;
         using Parent::parameters;
         using Parent::subscribers;
-        using typename Parent::MemberDelegateType;
+        using typename Parent::MemberFunctionType;
 
         /**
          * @brief           Call all subscribed methods of this delegate that have parameters saved on subscription.
@@ -774,7 +774,7 @@ namespace dw
         using Parent = MemberDelegateBase<ReturnType, ObjType, Params...>;
         using Parent::parameters;
         using Parent::subscribers;
-        using typename Parent::MemberDelegateType;
+        using typename Parent::MemberFunctionType;
 
         /**
          * @brief           Call all subscribed methods of this delegate that have parameters saved on subscription.
