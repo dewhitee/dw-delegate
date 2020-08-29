@@ -22,7 +22,7 @@
 Small header-only templates library for C#-like delegate.
 
 # API
-###### Note: All classes are templates.
+###### Note: All classes are templates in the `dw` namespace.
 ### DelegateBase
 Abstract base (parent) class of (almost) all delegates.
 
@@ -102,7 +102,7 @@ subscribers  | `std::vector<DelegateType>`                         | Vector of f
 #### Methods:
 Method name: | Return Type:      | Parameters:                                                            | Description
 -------------|-------------------|------------------------------------------------------------------------|------------
-operator()   | `ReturnType`      | `Params... params`                                                     | [Invokes](#calling) all subscribed functions with the specified `params`. 
+operator()   | `void`            | `Params... params`                                                     | [Invokes](#calling) all subscribed functions with the specified `params`. 
 operator+=   | `SimpleDelegate&` | `const DelegateType& rhs`                                              | [Subscribes](#subscribing) function to this delegate.
 operator-=   | `SimpleDelegate&` | `const DelegateType& rhs`                                              | [Unsubscribes](#removing) choosen function from this delegate.
 
@@ -123,7 +123,7 @@ parameters   | `std::vector<MemberDelegateParams<Params...>>`      | Vector of p
 Method name: | Return Type:      | Parameters:                                                            | Description
 -------------|-------------------|------------------------------------------------------------------------|------------
 Subscribe    | `void`            | `ObjType* obj, const MemberDelegateType& method, Params...`            | [Subscribes](#subscribing) single member function and saves single parameters pack.
-Invoke       | `void`            | *none*                                                                 | [Subscribes](#subscribing) method to this delegate.
+Invoke       | `void`            | *none*                                                                 | [Call](#calling) all subscribed methods of this delegate that have parameters saved on subscription.
 operator()   | `void`            | `ObjType* obj, Params... params`                                       | [Calls](#calling) all subscribed methods with the specified `params` on the `obj`.
 operator+=   | `MemberDelegate&` | `const MemberDelegateType& rhs`                                        | [Subscribe](#subscribing) method to this delegate.
 operator+=   | `MemberDelegate&` | `const std::initializer_list<MemberDelegateType>& rhs`                 | [Subscribe](#subscribing) multiple methods to this delegate.
