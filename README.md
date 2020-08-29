@@ -67,10 +67,10 @@ Clear        | `void`         | *none*                                          
 operator+=   | `DelegateBase&`| `const FunctionType& rhs`                                                | [Subscribes](#subscribe) function to this delegate.
 operator+=   | `DelegateBase&`| `const std::initializer_list<FunctionType>& rhs`                         | [Subscribes](#subscribe) multiple functions to this delegate.
 operator-=   | `DelegateBase&`| `const FunctionType& rhs`                                                | [Unsubscribes](#removing) choosen function from this delegate.
-operator++   | `DelegateBase&`| *none*                                                                   | Prefix version for [duplicating](#duplicating) delegate's last subscribed function.
-operator++   | `DelegateBase&`| `int`                                                                    | Postfix version for [duplicating](#duplicating) delegate's last subscribed function.
-operator--   | `DelegateBase&`| *none*                                                                   | Prefix version for [removing](#removing) delegate's last subscribed function.
-operator--   | `DelegateBase&`| `int`                                                                    | Postfix version for [removing](#removing) delegate's last subscribed function.
+operator++   | `DelegateBase&`| *none*                                                                   | Prefix version for [duplicating](#duplicating) delegate's *first* subscribed function.
+operator++   | `DelegateBase&`| `int`                                                                    | Postfix version for [duplicating](#duplicating) delegate's *last* subscribed function.
+operator--   | `DelegateBase&`| *none*                                                                   | Prefix version for [removing](#removing) delegate's *first* subscribed function.
+operator--   | `DelegateBase&`| `int`                                                                    | Postfix version for [removing](#removing) delegate's *last* subscribed function.
 operator==   | `bool`         | `const DelegateBase& rhs`                                                | Compares subscribers of other delegate to subscribers of this delegate.
 operator<    | `bool`         | `const DelegateBase& rhs`                                                | Compares the size of subscribers vector of both delegates.
 operator>    | `bool`         | `const DelegateBase& rhs`                                                | Compares the size of subscribers vector of both delegates.
