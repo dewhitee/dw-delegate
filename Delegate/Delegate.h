@@ -76,7 +76,7 @@ namespace dw
     class DelegateBase : public SimpleDelegateBase<ReturnType, Params...>
     {
         template <typename... T>
-        struct DelegateParams
+        struct FunctionParams
         {
             size_t index = -1;
             std::tuple<T...> parameters;
@@ -90,7 +90,7 @@ namespace dw
         /**
          * @brief           Vector of parameters updated when each function is subscribed to this delegate using Subscribe() method.
          */
-        std::vector<DelegateParams<Params...>> parameters;
+        std::vector<FunctionParams<Params...>> parameters;
 
     public:
         const std::vector<FunctionType> &GetSubscribers() const { return this->subscribers; }
@@ -480,12 +480,12 @@ namespace dw
     private:
         void AttachParameters(Params... params)
         {
-            this->parameters.push_back(DelegateParams<Params...>{subscribers.size() - 1, params...});
+            this->parameters.push_back(FunctionParams<Params...>{subscribers.size() - 1, params...});
         }
         template <size_t... Indices>
         void AttachParameters(const std::tuple<Params...> &tuple, std::index_sequence<Indices...>)
         {
-            this->parameters.push_back(DelegateParams<Params...>{subscribers.size() - 1, tuple});
+            this->parameters.push_back(FunctionParams<Params...>{subscribers.size() - 1, tuple});
         }
         void DetachParameters(const size_t index)
         {
@@ -496,7 +496,7 @@ namespace dw
                 std::remove_if(
                     parameters.begin(),
                     parameters.end(),
-                    [index, &erasedCount](const DelegateParams<Params...> &x) {
+                    [index, &erasedCount](const FunctionParams<Params...> &x) {
                         if (x.index == index)
                         {
                             erasedCount++;
@@ -610,7 +610,7 @@ namespace dw
     class MemberDelegateBase
     {
         template <typename... T>
-        struct MemberDelegateParams
+        struct MemberFunctionParams
         {
             size_t index = -1;
             ObjType *object;
@@ -629,7 +629,7 @@ namespace dw
         /**
          * @brief           Vector of parameters saved when each method is subscribed to this delegate.
          */
-        std::vector<MemberDelegateParams<Params...>> parameters;
+        std::vector<MemberFunctionParams<Params...>> parameters;
 
         MemberDelegateBase() = default;
 
@@ -713,12 +713,12 @@ namespace dw
     private:
         void AttachParameters(ObjType *obj, Params... params)
         {
-            this->parameters.push_back(MemberDelegateParams<Params...>{subscribers.size() - 1, obj, params...});
+            this->parameters.push_back(MemberFunctionParams<Params...>{subscribers.size() - 1, obj, params...});
         }
         template <size_t... Indices>
         void AttachParameters(ObjType *obj, const std::tuple<Params...> &tuple, std::index_sequence<Indices...>)
         {
-            this->parameters.push_back(MemberDelegateParams<Params...>{subscribers.size() - 1, obj, tuple});
+            this->parameters.push_back(MemberFunctionParams<Params...>{subscribers.size() - 1, obj, tuple});
         }
     };
 
