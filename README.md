@@ -1,5 +1,4 @@
 # dw-delegate
-## Table of contents
 * [General info](#general-info)
 * [API](#api)
   - [SimpleDelegateBase](#simpledelegatebase)
